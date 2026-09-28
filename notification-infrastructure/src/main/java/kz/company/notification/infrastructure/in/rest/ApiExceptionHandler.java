@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -64,6 +65,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = problem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "Unexpected error; the request can be retried with the same Idempotency-Key");
         return ResponseEntity.internalServerError().body(problem);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ProblemDetail> handleMissingHeader(MissingRequestHeaderException exception) {
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "REQUEST_INVALID",
+                "Required header '" + exception.getHeaderName() + "' is not present");
+        return ResponseEntity.badRequest().body(problem);
     }
 
     @Override

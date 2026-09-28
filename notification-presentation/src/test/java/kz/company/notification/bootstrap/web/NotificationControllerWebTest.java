@@ -83,7 +83,8 @@ class NotificationControllerWebTest {
     private static org.springframework.test.web.servlet.request.RequestPostProcessor client(String... scopes) {
         return jwt().jwt(token -> token.claim("client_id", "orders-service"))
                 .authorities(java.util.Arrays.stream(scopes)
-                        .map(scope -> new org.springframework.security.core.authority.SimpleGrantedAuthority("SCOPE_" + scope))
+                        .map(scope -> (org.springframework.security.core.GrantedAuthority)
+                                new org.springframework.security.core.authority.SimpleGrantedAuthority("SCOPE_" + scope))
                         .toList());
     }
 

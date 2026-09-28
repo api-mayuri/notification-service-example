@@ -107,7 +107,7 @@ abstract class IntegrationTestSupport {
         return records;
     }
 
-    protected static String header(ConsumerRecord<String, String> record, String name) {
+    protected static String kafkaHeader(ConsumerRecord<String, String> record, String name) {
         var header = record.headers().lastHeader(name);
         return header == null ? null : new String(header.value(), StandardCharsets.UTF_8).replace("\"", "");
     }

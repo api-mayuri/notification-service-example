@@ -52,7 +52,7 @@ class NotificationFlowIT extends IntegrationTestSupport {
         return JsonPath.read(result.getResponse().getContentAsString(), "$.id");
     }
 
-    private String status(String clientId, String notificationId) throws Exception {
+    private String notificationStatus(String clientId, String notificationId) throws Exception {
         String json = mockMvc.perform(get("/api/v1/notifications/" + notificationId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(clientId, "notifications:read")))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class NotificationFlowIT extends IntegrationTestSupport {
         String email = "anna-" + UUID.randomUUID() + "@example.com";
         String id = send("it-" + UUID.randomUUID(), welcomeEmail("user-anna", email));
 
-        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> assertThat(status(CLIENT, id)).isEqualTo("COMPLETED"));
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> assertThat(notificationStatus(CLIENT, id)).isEqualTo("COMPLETED"));
 
         MimeMessage delivered = Arrays.stream(GREEN_MAIL.getReceivedMessages())
                 .filter(message -> {
@@ -82,10 +82,10 @@ class NotificationFlowIT extends IntegrationTestSupport {
             List<ConsumerRecord<String, String>> events = readAll("notification.events.v1").stream()
                     .filter(record -> id.equals(record.key()))
                     .toList();
-            assertThat(events.stream().map(record -> header(record, "ce_type")).toList())
+            assertThat(events.stream().map(record -> kafkaHeader(record, "ce_type")).toList())
                     .contains("kz.company.notification.delivery.sent.v1",
                             "kz.company.notification.notification.completed.v1");
-            assertThat(header(events.getFirst(), "ce_specversion")).isEqualTo("1.0");
+            assertThat(kafkaHeader(events.getFirst(), "ce_specversion")).isEqualTo("1.0");
         });
     }
 
@@ -171,7 +171,7 @@ class NotificationFlowIT extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.deliveries[0].status").value("CANCELLED"));
 
         String sent = send("it-" + UUID.randomUUID(), welcomeEmail("user-sent", "sent@example.com"));
-        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> assertThat(status(CLIENT, sent)).isEqualTo("COMPLETED"));
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> assertThat(notificationStatus(CLIENT, sent)).isEqualTo("COMPLETED"));
         mockMvc.perform(post("/api/v1/notifications/" + sent + "/cancel")
                         .header(HttpHeaders.AUTHORIZATION, bearer(CLIENT, "notifications:send")))
                 .andExpect(status().isConflict());
