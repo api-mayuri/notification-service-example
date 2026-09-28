@@ -20,9 +20,12 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.kafka.config.ContainerCustomizer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.retrytopic.RetryTopicConfiguration;
 import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
@@ -43,6 +46,27 @@ public class KafkaConfiguration {
     @Bean
     static DeliveryListenerRegistrar deliveryListenerRegistrar() {
         return new DeliveryListenerRegistrar();
+    }
+
+    /**
+     * Выделенный исполнитель для Kafka consumer threads. Виртуальные потоки устраняют ограничение
+     * platform thread pool при запуске большого числа listener containers одновременно.
+     */
+    @Bean
+    SimpleAsyncTaskExecutor kafkaListenerExecutor() {
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("kafka-listener-");
+        executor.setVirtualThreads(true);
+        return executor;
+    }
+
+    /**
+     * Применяет {@link #kafkaListenerExecutor()} к автоконфигурированной фабрике по умолчанию
+     * (используется {@code @KafkaListener} без явного containerFactory).
+     */
+    @Bean
+    ContainerCustomizer<Object, Object, KafkaMessageListenerContainer<Object, Object>> kafkaContainerCustomizer(
+            SimpleAsyncTaskExecutor kafkaListenerExecutor) {
+        return container -> container.getContainerProperties().setListenerTaskExecutor(kafkaListenerExecutor);
     }
 
     /**
@@ -82,12 +106,13 @@ public class KafkaConfiguration {
     @Bean
     ConcurrentKafkaListenerContainerFactory<Object, Object> sendRequestContainerFactory(
             ConsumerFactory<Object, Object> consumerFactory, KafkaTemplate<Object, Object> kafkaTemplate,
-            NotificationKafkaProperties properties) {
+            NotificationKafkaProperties properties, SimpleAsyncTaskExecutor kafkaListenerExecutor) {
         ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(Math.min(3, properties.partitions()));
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         factory.getContainerProperties().setObservationEnabled(true);
+        factory.getContainerProperties().setListenerTaskExecutor(kafkaListenerExecutor);
 
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, exception) -> new TopicPartition(record.topic() + properties.deadLetterSuffix(), record.partition()));
