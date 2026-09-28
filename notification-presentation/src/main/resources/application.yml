@@ -1,0 +1,216 @@
+# Base configuration. Secrets come from environment variables only.
+spring:
+  application:
+    name: notification-service
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/notifications}
+    username: ${DB_USERNAME:notifications}
+    password: ${DB_PASSWORD:notifications}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: kz.company.notification.infrastructure.messaging.ExternalMessageSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        max.block.ms: 10000
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      isolation-level: read-committed
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+      observation-enabled: true
+    template:
+      observation-enabled: true
+
+  # Corporate SMTP. Examples for Exchange, Postfix, Microsoft 365, Google Workspace — see README.
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
+      mail.smtp.starttls.required: ${SMTP_STARTTLS:false}
+      mail.smtp.ssl.enable: ${SMTP_SSL:false}
+      mail.smtp.connectiontimeout: ${SMTP_CONNECT_TIMEOUT_MS:5000}
+      mail.smtp.timeout: ${SMTP_READ_TIMEOUT_MS:10000}
+      mail.smtp.writetimeout: ${SMTP_WRITE_TIMEOUT_MS:10000}
+
+  # Transactional outbox via Spring Modulith Event Publication Registry (JDBC).
+  # Table event_publication is created by Liquibase; auto-init disabled.
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: false
+      republish-outstanding-events-on-restart: true
+      completion-mode: delete
+      externalization:
+        enabled: true
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    mail:
+      enabled: true
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
+  observations:
+    key-values:
+      application: notification-service
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+springdoc:
+  api-docs:
+    version: openapi_3_1
+  swagger-ui:
+    path: /swagger-ui.html
+  default-produces-media-type: application/json
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      channels:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+  ratelimiter:
+    configs:
+      clients:
+        limit-for-period: ${CLIENT_RATE_LIMIT_PER_SECOND:100}
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+
+notification:
+  default-locale: ru
+  retry:
+    max-attempts: 5
+    initial-delay: 30s
+    multiplier: 2.0
+    max-delay: 30m
+    jitter: 0.2
+  delivery:
+    stale-sending-threshold: 5m
+    overdue-retry-grace: 10m
+    batch-size: 200
+    idempotency-key-retention: 7d
+    rate-limits:
+      sms:
+        max: 5
+        window: 1h
+        categories: [MARKETING]
+  kafka:
+    source: urn:kz.company:notification-service
+    trusted-sources: ${KAFKA_TRUSTED_SOURCES:}
+    consumer-group-prefix: notification-service
+    partitions: 12
+    replication-factor: 3
+    min-insync-replicas: 2
+    retention: 7d
+    dead-letter-retention: 30d
+  scheduler:
+    enabled: true
+    dispatch-interval: 5s
+    recovery-interval: 1m
+    idempotency-cleanup-interval: 1h
+    outbox-resubmit-interval: 1m
+    outbox-resubmit-after: 2m
+  recipient-directory:
+    base-url: ${RECIPIENT_DIRECTORY_URL:}
+    bearer-token: ${RECIPIENT_DIRECTORY_TOKEN:}
+  security:
+    dev-tokens:
+      enabled: false
+  channels:
+    email:
+      enabled: true
+      provider: smtp
+      max-concurrency: 20
+      concurrency: 3
+      from: ${MAIL_FROM:no-reply@example.com}
+      from-name: ${MAIL_FROM_NAME:Notifications}
+      reply-to: ${MAIL_REPLY_TO:}
+      message-id-domain: ${MAIL_MESSAGE_ID_DOMAIN:notification.local}
+      unsubscribe-url-template: ${MAIL_UNSUBSCRIBE_URL_TEMPLATE:}
+    sms:
+      enabled: true
+      provider: logging
+      max-concurrency: 10
+    telegram:
+      enabled: true
+      provider: logging
+      max-concurrency: 20
+    whatsapp:
+      enabled: true
+      provider: logging
+      max-concurrency: 10
+    push:
+      enabled: true
+      provider: logging
+      max-concurrency: 50
+    webhook:
+      enabled: true
+      provider: http
+      max-concurrency: 20
+      signing-secret: ${WEBHOOK_SIGNING_SECRET:}
+      require-https: false
+      connect-timeout: 5s
+      read-timeout: 10s

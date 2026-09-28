@@ -1,0 +1,21 @@
+# Master changelog. Rules: one changeset per change; applied changesets are immutable (add new ones only);
+# every schema change has a rollback; seed data is separate and labeled "seed".
+databaseChangeLog:
+  - include:
+      file: changes/001-create-notification.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/002-create-delivery.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/003-create-template.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/004-create-recipient-preferences.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/005-create-event-publication.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/100-seed-templates.sql
+      relativeToChangelogFile: true

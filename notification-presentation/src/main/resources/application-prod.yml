@@ -1,0 +1,25 @@
+# Production: tokens from corporate IdP, Swagger UI disabled, HTTPS-only webhooks.
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI}
+
+management:
+  server:
+    port: 8081
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+notification:
+  security:
+    dev-tokens:
+      enabled: false
+  channels:
+    webhook:
+      require-https: true

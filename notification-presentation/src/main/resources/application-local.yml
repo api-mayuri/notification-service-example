@@ -1,0 +1,30 @@
+# Local (docker compose): single Kafka broker, Mailpit instead of SMTP, dev tokens enabled.
+spring:
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    kz.company.notification: DEBUG
+
+notification:
+  kafka:
+    partitions: 3
+    replication-factor: 1
+    min-insync-replicas: 1
+    trusted-sources: urn:local:demo-producer
+  retry:
+    initial-delay: 5s
+    max-delay: 1m
+  security:
+    dev-tokens:
+      enabled: true

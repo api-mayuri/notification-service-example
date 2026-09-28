@@ -1,0 +1,60 @@
+# Integration tests: single broker, short retry delays, frequent scheduler ticks.
+notification:
+  security:
+    dev-tokens:
+      enabled: true
+  kafka:
+    partitions: 1
+    replication-factor: 1
+    min-insync-replicas: 1
+    trusted-sources: urn:it:trusted
+  retry:
+    max-attempts: 3
+    initial-delay: 1s
+    multiplier: 2.0
+    max-delay: 2s
+    jitter: 0.0
+  delivery:
+    stale-sending-threshold: 30s
+    overdue-retry-grace: 30s
+  scheduler:
+    dispatch-interval: 500ms
+    recovery-interval: 1s
+    outbox-resubmit-interval: 1s
+    outbox-resubmit-after: 2s
+  channels:
+    email:
+      concurrency: 1
+      high-priority-concurrency: 1
+    sms:
+      concurrency: 1
+      high-priority-concurrency: 1
+    telegram:
+      concurrency: 1
+      high-priority-concurrency: 1
+    whatsapp:
+      concurrency: 1
+      high-priority-concurrency: 1
+    push:
+      concurrency: 1
+      high-priority-concurrency: 1
+    webhook:
+      provider: logging
+      concurrency: 1
+      high-priority-concurrency: 1
+
+spring:
+  kafka:
+    consumer:
+      properties:
+        metadata.max.age.ms: 1000
+    producer:
+      properties:
+        max.block.ms: 3000
+        delivery.timeout.ms: 5000
+        request.timeout.ms: 2000
+
+management:
+  tracing:
+    sampling:
+      probability: 0.0

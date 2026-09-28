@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(sed -i 's/--comment: Принятые уведомления/--comment: Accepted notifications/' 001-create-notification.sql)",
+      "Bash(sed -i 's/--comment: Доставки уведомлений по каналам/--comment: Per-channel delivery records/' 002-create-delivery.sql)",
+      "Bash(sed -i 's|--comment: Шаблоны \\(ключ + канал + локаль\\) и их версии|--comment: Templates \\(key + channel + locale\\) and revisions|' 003-create-template.sql)",
+      "Bash(sed -i 's/--comment: Предпочтения получателей/--comment: Recipient preferences/' 004-create-recipient-preferences.sql)",
+      "Bash(sed -i 's|--comment: Журнал публикаций Spring Modulith \\(transactional outbox\\), схема 2.x для PostgreSQL|--comment: Spring Modulith event publication log \\(transactional outbox\\)|' 005-create-event-publication.sql)",
+      "Bash(sed -i 's|# Локальное окружение: PostgreSQL, Kafka \\(KRaft, без ZooKeeper\\), Kafka UI, Mailpit и сам сервис.|# Local environment: PostgreSQL, Kafka \\(KRaft, no ZooKeeper\\), Kafka UI, Mailpit, and the service.|' docker-compose.yml)",
+      "Bash(sed -i 's|      # Топики создаёт только сервис \\(бины NewTopic\\), автосоздание выключено.|      # Topics are created by the service \\(NewTopic beans\\); auto-creation is disabled.|' docker-compose.yml)",
+      "Bash(sed -i 's|# Сборка: Maven + JDK 25. Кэш ~/.m2 переиспользуется между сборками.|# Build: Maven + JDK 25. ~/.m2 cache is reused between builds.|' Dockerfile)",
+      "Bash(sed -i 's|# Запуск: только JRE, непривилегированный пользователь, слои Spring Boot для кэша образов.|# Runtime: JRE only, unprivileged user, Spring Boot layers for image caching.|' Dockerfile)",
+      "Bash(git config *)"
+    ]
+  }
+}

@@ -1,0 +1,328 @@
+asyncapi: 3.0.0
+info:
+  title: Notification Service — Kafka API
+  version: 1.0.0
+  description: |
+    Асинхронный контракт сервиса нотификаций.
+    Формат сообщений — CloudEvents 1.0, Kafka Protocol Binding, binary content mode:
+    атрибуты CloudEvents передаются заголовками `ce_*`, данные — JSON в значении записи
+    (`content-type: application/json`). Трассировка — заголовок `traceparent` (W3C Trace Context).
+    Несовместимые изменения выпускаются новой версией типа и нового топика (`.v2`).
+    Schema Registry не используется (следующий шаг).
+defaultContentType: application/json
+
+servers:
+  local:
+    host: localhost:29092
+    protocol: kafka
+    description: Брокер из docker-compose (KRaft, один узел)
+
+channels:
+  sendRequests:
+    address: notification.send.requests.v1
+    title: Входящие команды на отправку
+    description: |
+      Другие сервисы публикуют команды на уведомление. Ключ записи — recipientId (порядок для получателя).
+      Отправитель — `ce_source`; ключ идемпотентности — `idempotencyKey` из данных или `ce_id`.
+    messages:
+      sendNotification:
+        $ref: '#/components/messages/SendNotification'
+    bindings:
+      kafka:
+        partitions: 12
+        replicas: 3
+        topicConfiguration:
+          retention.ms: 604800000
+          min.insync.replicas: 2
+  sendRequestsDeadLetter:
+    address: notification.send.requests.v1-dlt
+    title: Невалидные и отклонённые команды
+    description: |
+      Сообщение не разобрано, нарушает контракт или отклонено бизнес-правилами (без повторов),
+      либо временная ошибка не прошла за 5 повторов. Причина — в заголовках `kafka_dlt-exception-*`.
+    messages:
+      sendNotification:
+        $ref: '#/components/messages/SendNotification'
+    bindings:
+      kafka:
+        topicConfiguration:
+          retention.ms: 2592000000
+  deliveryRequests:
+    address: notification.delivery.{channel}.v1
+    title: Доставки канала (обычный приоритет)
+    description: |
+      Внутренний топик: постановка доставки в очередь канала через outbox. Отдельный топик и consumer
+      group на канал (`notification-service.delivery.{channel}`). Ключ — recipientId.
+      Повторы — `notification.delivery.{channel}.v1-retry-{n}` (экспоненциальная задержка),
+      parking lot — `notification.delivery.{channel}.v1-dlt` (хранение 30 дней).
+    parameters:
+      channel:
+        $ref: '#/components/parameters/channel'
+    messages:
+      deliveryRequested:
+        $ref: '#/components/messages/DeliveryRequested'
+  deliveryRequestsHigh:
+    address: notification.delivery.{channel}.high.v1
+    title: Доставки канала (приоритет HIGH)
+    description: Отдельная полоса с отдельной consumer group `notification-service.delivery.{channel}.high` и бо́льшим числом потребителей.
+    parameters:
+      channel:
+        $ref: '#/components/parameters/channel'
+    messages:
+      deliveryRequested:
+        $ref: '#/components/messages/DeliveryRequested'
+  statusEvents:
+    address: notification.events.v1
+    title: События статусов
+    description: Системы-отправители подписываются на события вместо опроса API. Ключ — notificationId.
+    messages:
+      deliveryStatusChanged:
+        $ref: '#/components/messages/DeliveryStatusChanged'
+      notificationAccepted:
+        $ref: '#/components/messages/NotificationAccepted'
+      notificationCompleted:
+        $ref: '#/components/messages/NotificationCompleted'
+      notificationCancelled:
+        $ref: '#/components/messages/NotificationCancelled'
+    bindings:
+      kafka:
+        partitions: 12
+        replicas: 3
+        topicConfiguration:
+          retention.ms: 604800000
+
+operations:
+  receiveSendRequest:
+    action: receive
+    channel:
+      $ref: '#/channels/sendRequests'
+    summary: Принять команду на уведомление (тот же сценарий, что POST /api/v1/notifications)
+    bindings:
+      kafka:
+        groupId:
+          type: string
+          const: notification-service.send-requests
+  sendDeliveryRequest:
+    action: send
+    channel:
+      $ref: '#/channels/deliveryRequests'
+    summary: Поставить доставку в очередь канала (outbox)
+  receiveDeliveryRequest:
+    action: receive
+    channel:
+      $ref: '#/channels/deliveryRequests'
+    summary: Воркер канала отправляет доставку провайдеру
+  publishStatusEvent:
+    action: send
+    channel:
+      $ref: '#/channels/statusEvents'
+    summary: Опубликовать изменение статуса (outbox)
+
+components:
+  parameters:
+    channel:
+      enum: [email, sms, telegram, whatsapp, push, webhook]
+      description: Код канала в нижнем регистре
+
+  messageTraits:
+    cloudEvent:
+      headers:
+        type: object
+        required: [ce_id, ce_source, ce_type, ce_specversion]
+        properties:
+          ce_id:
+            type: string
+            description: Уникальный идентификатор события у источника
+          ce_source:
+            type: string
+            format: uri-reference
+            description: Источник; для входящих команд — идентификатор отправителя (client_id)
+          ce_type:
+            type: string
+            description: Тип с версией
+          ce_specversion:
+            type: string
+            const: '1.0'
+          ce_time:
+            type: string
+            format: date-time
+          ce_subject:
+            type: string
+          content-type:
+            type: string
+            const: application/json
+          traceparent:
+            type: string
+            description: W3C Trace Context
+
+  messages:
+    SendNotification:
+      name: SendNotification
+      title: kz.company.notification.send.v1
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      bindings:
+        kafka:
+          key:
+            type: string
+            description: recipientId
+      payload:
+        $ref: '#/components/schemas/NotificationRequest'
+      examples:
+        - name: orderShipped
+          headers:
+            ce_id: 5d1b1f0e-9d0e-4c1c-9a54-0c8f1d8f2a11
+            ce_source: urn:kz.company:orders-service
+            ce_type: kz.company.notification.send.v1
+            ce_specversion: '1.0'
+            content-type: application/json
+          payload:
+            recipient:
+              id: 8f14e45f-ceea-467a-9575-b1b1b1b1b1b1
+              contacts:
+                email: user@example.com
+                telegramChatId: '123456'
+            template:
+              key: order-shipped
+              locale: ru-KZ
+              variables:
+                orderId: ORD-42
+            channels: [EMAIL, TELEGRAM]
+            category: TRANSACTIONAL
+            priority: HIGH
+            metadata:
+              correlationId: c-42
+    DeliveryRequested:
+      name: DeliveryRequested
+      title: kz.company.notification.delivery.requested.v1
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      payload:
+        type: object
+        required: [deliveryId, notificationId, channel, priority]
+        properties:
+          deliveryId: {type: string, format: uuid}
+          notificationId: {type: string, format: uuid}
+          channel: {type: string}
+          priority: {type: string, enum: [LOW, NORMAL, HIGH]}
+          attemptsSoFar: {type: integer}
+    DeliveryStatusChanged:
+      name: DeliveryStatusChanged
+      title: kz.company.notification.delivery.{status}.v1
+      summary: Типы — delivery.scheduled, delivery.sent, delivery.retry-scheduled, delivery.failed, delivery.skipped, delivery.cancelled, delivery.delivered
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      payload:
+        type: object
+        required: [deliveryId, notificationId, channel, status, occurredAt]
+        properties:
+          deliveryId: {type: string, format: uuid}
+          notificationId: {type: string, format: uuid}
+          channel: {type: string}
+          status:
+            type: string
+            enum: [PENDING, SENT, RETRY_SCHEDULED, FAILED, SKIPPED, CANCELLED, DELIVERED]
+          occurredAt: {type: string, format: date-time}
+          attempt: {type: integer, description: 'sent, retry-scheduled'}
+          attempts: {type: integer, description: failed}
+          providerMessageId: {type: string, description: sent}
+          simulated: {type: boolean, description: 'sent: отправку выполнила заглушка провайдера'}
+          nextAttemptAt: {type: string, format: date-time, description: retry-scheduled}
+          reason: {type: string, description: 'retry-scheduled, failed, skipped'}
+          permanent: {type: boolean, description: failed}
+          recipientId: {type: string, description: scheduled}
+          priority: {type: string, description: scheduled}
+          scheduledFor: {type: string, format: date-time, description: scheduled}
+      examples:
+        - name: sent
+          headers:
+            ce_id: 0b6c2a8e-3a1f-4f55-8b53-3c7f5a0e7d11
+            ce_source: urn:kz.company:notification-service
+            ce_type: kz.company.notification.delivery.sent.v1
+            ce_specversion: '1.0'
+            ce_subject: 01928f4e-8b1a-7c3d-9e2f-1a2b3c4d5e6f
+          payload:
+            deliveryId: 01928f4e-8b1a-7c3d-9e2f-1a2b3c4d5e6f
+            notificationId: 01928f4e-8b10-7c3d-9e2f-1a2b3c4d5e00
+            channel: EMAIL
+            status: SENT
+            attempt: 1
+            providerMessageId: <01928f4e-8b1a-7c3d-9e2f-1a2b3c4d5e6f@company.kz>
+            simulated: false
+            occurredAt: '2026-09-26T10:00:01Z'
+    NotificationAccepted:
+      name: NotificationAccepted
+      title: kz.company.notification.notification.accepted.v1
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      payload:
+        type: object
+        properties:
+          notificationId: {type: string, format: uuid}
+          clientId: {type: string}
+          recipientId: {type: string}
+          category: {type: string}
+          priority: {type: string}
+          channels: {type: array, items: {type: string}}
+          occurredAt: {type: string, format: date-time}
+    NotificationCompleted:
+      name: NotificationCompleted
+      title: kz.company.notification.notification.completed.v1
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      payload:
+        type: object
+        properties:
+          notificationId: {type: string, format: uuid}
+          status: {type: string, enum: [COMPLETED, PARTIALLY_FAILED, FAILED]}
+          occurredAt: {type: string, format: date-time}
+    NotificationCancelled:
+      name: NotificationCancelled
+      title: kz.company.notification.notification.cancelled.v1
+      traits:
+        - $ref: '#/components/messageTraits/cloudEvent'
+      payload:
+        type: object
+        properties:
+          notificationId: {type: string, format: uuid}
+          occurredAt: {type: string, format: date-time}
+
+  schemas:
+    NotificationRequest:
+      type: object
+      required: [recipient, channels, category]
+      description: Ровно одно из полей template и content.
+      properties:
+        recipient:
+          type: object
+          required: [id]
+          properties:
+            id: {type: string, maxLength: 100}
+            contacts:
+              type: object
+              description: Тип контакта → значение (email, phone в E.164, telegramChatId, deviceToken, webhookUrl)
+              additionalProperties: {type: string}
+        template:
+          type: object
+          required: [key]
+          properties:
+            key: {type: string, pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'}
+            locale: {type: string, description: BCP 47}
+            variables: {type: object, additionalProperties: true}
+        content:
+          type: object
+          description: Только для доверенных источников (notification.kafka.trusted-sources)
+          properties:
+            subject: {type: string}
+            text: {type: string}
+            html: {type: string}
+        channels:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items: {type: string, enum: [EMAIL, SMS, TELEGRAM, WHATSAPP, PUSH, WEBHOOK]}
+        category: {type: string, enum: [TRANSACTIONAL, MARKETING, SYSTEM]}
+        priority: {type: string, enum: [LOW, NORMAL, HIGH], default: NORMAL}
+        sendAt: {type: string, format: date-time}
+        metadata: {type: object, maxProperties: 20, additionalProperties: {type: string}}
+        idempotencyKey: {type: string, maxLength: 255}
