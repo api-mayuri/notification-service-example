@@ -4,6 +4,12 @@
 - **Дата:** 2026-09-26
 - **Статус:** этапы 0–10 выполнены в коде и документации. 2026-10-13: `./mvnw verify` на JDK 25 проходит полностью, включая все `*IT` (см. «Исправления после первого прогона»).
 
+## Документация (2026-10-13)
+
+- Документация разделена: для разработчиков — `README.md` и `docs/` (`architecture.md`, `integration.md`, `configuration.md`, `extending.md`); для ИИ — `CLAUDE.md` и `ai/` (этот журнал, `plan.md`, `research.md`).
+- Раздел «Что НЕ проверено» ниже исторический: `./mvnw verify` на JDK 25 проходит. Не проверен только `docker compose up` вручную.
+- Найдено при описании настроек: `notification.delivery.rate-limits.<канал>` без `categories` не действует ни на одну категорию (JavaDoc `NotificationProperties` обещает MARKETING по умолчанию). Задокументировано, код не менялся.
+
 ## Исправления после первого прогона (2026-10-13)
 
 - **Доставки не работали.** `spring-modulith-events-kafka` регистрирует JSON `RecordMessageConverter`, и в Kafka уходила вся обёртка `ExternalMessage` вместо payload: воркеры не находили `deliveryId`, всё уходило в DLT, уведомления оставались `ACCEPTED`. Исправлено `spring.modulith.events.kafka.enable-json=false`; `NotificationFlowIT` теперь проверяет тело события.

@@ -4,7 +4,7 @@
 
 - README примера прочитан через веб-страницу репозитория;
 - `DESIGN.md` и код в `app/` недоступны, выводы о них сделаны по README;
-- справочная информация о Spring и Kafka сверена с актуальной документацией точечно (Resilience Features, Modulith API, Retry Topics). Остальное — по знаниям на середину 2026 года, помечено в `docs/progress.md`.
+- справочная информация о Spring и Kafka сверена с актуальной документацией точечно (Resilience Features, Modulith API, Retry Topics). Остальное — по знаниям на середину 2026 года, помечено в `ai/progress.md`.
 
 ## Пример-ориентир: Fred123-dev/Notification-Service (Python, FastAPI)
 
