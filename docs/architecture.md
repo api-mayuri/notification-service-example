@@ -116,7 +116,7 @@ PENDING | RETRY_SCHEDULED → FAILED (запись ушла в DLT)
 
 ## Безопасность
 
-- OAuth2 Resource Server (JWT). Отправитель (`clientId`) берётся из claim `client_id`, затем `azp`, затем `sub`. Каждый клиент видит только свои уведомления и статистику.
+- OAuth2 Resource Server (JWT): сервис не выдаёт токены и не является OAuth-клиентом, он только проверяет JWT вашего IdP — подпись (JWKS из `issuer-uri`), срок, `iss` и `aud` (`JWT_AUDIENCE`). Отправитель (`clientId`) берётся из claim `client_id`, затем `azp`, затем `sub`. Каждый клиент видит только свои уведомления и статистику.
 - Права — scopes (см. [integration.md](integration.md#авторизация)).
 - Лимит запросов на клиента (Resilience4j RateLimiter, в памяти экземпляра) → `429` с `Retry-After`.
 - Персональные данные в логах маскируются. В событиях Kafka адресов нет.

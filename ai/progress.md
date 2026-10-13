@@ -10,6 +10,11 @@
 - Раздел «Что НЕ проверено» ниже исторический: `./mvnw verify` на JDK 25 проходит. Не проверен только `docker compose up` вручную.
 - Найдено при описании настроек: `notification.delivery.rate-limits.<канал>` без `categories` не действует ни на одну категорию (JavaDoc `NotificationProperties` обещает MARKETING по умолчанию). Исправлено: без `categories` лимит применяется к MARKETING (`UseCaseConfiguration`, тест `UseCaseConfigurationTest`).
 
+## Безопасность (2026-10-14)
+
+- В `prod` не проверялся `aud`: принимался любой токен того же IdP со scope `notifications:*`. Добавлено `spring.security.oauth2.resourceserver.jwt.audiences: ${JWT_AUDIENCE:notification-service}`; тест `ProdJwtAudienceTest` (фейковый IdP на JDK HttpServer, реальный `application-prod.yml`).
+- Проверка деплоя `docker compose up --build`: REST и Kafka сценарии из README проходят, письма в Mailpit, события в `notification.events.v1`. Исправлен healthcheck сервиса в `docker-compose.yml`: `/dev/tcp` запускался через dash (`CMD-SHELL`) и всегда падал, контейнер не становился healthy.
+
 ## Исправления после первого прогона (2026-10-13)
 
 - **Доставки не работали.** `spring-modulith-events-kafka` регистрирует JSON `RecordMessageConverter`, и в Kafka уходила вся обёртка `ExternalMessage` вместо payload: воркеры не находили `deliveryId`, всё уходило в DLT, уведомления оставались `ACCEPTED`. Исправлено `spring.modulith.events.kafka.enable-json=false`; `NotificationFlowIT` теперь проверяет тело события.

@@ -5,6 +5,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI}
+          # Reject tokens the IdP issued for other services (aud claim must contain this value).
+          audiences: ${JWT_AUDIENCE:notification-service}
 
 management:
   server:

@@ -24,7 +24,7 @@ REST защищён OAuth2 (JWT). Отправитель — claim `client_id`, 
 | `templates:manage` | `/api/v1/templates/**` |
 | `preferences:manage` | `/api/v1/recipients/{id}/preferences` |
 
-- **prod:** токены выдаёт ваш IdP, сервис проверяет их по `JWT_ISSUER_URI` (профиль `prod`).
+- **prod:** токены выдаёт ваш IdP. Сервис проверяет подпись по ключам IdP (`JWT_ISSUER_URI`), срок действия, `iss` и `aud`: в claim `aud` должно быть значение `JWT_AUDIENCE` (по умолчанию `notification-service`). Токены, выданные для других сервисов, отклоняются с `401`. Настройте в IdP audience (resource/API) для этого сервиса.
 - **local:** `POST /dev/token {"clientId":"orders-service"}` выдаёт тестовый токен со всеми scopes.
 
 ## REST API

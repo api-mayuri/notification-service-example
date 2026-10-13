@@ -20,6 +20,7 @@
 | `KAFKA_BOOTSTRAP_SERVERS` | Kafka | `localhost:9092` |
 | `KAFKA_TRUSTED_SOURCES` | `ce_source` через запятую, которым разрешён `content` без шаблона | — |
 | `JWT_ISSUER_URI` | issuer IdP (профиль `prod`) | — |
+| `JWT_AUDIENCE` | значение, которое должно быть в claim `aud` токена (профиль `prod`) | `notification-service` |
 | `SMTP_HOST`, `SMTP_PORT` | SMTP-сервер | `localhost`, `1025` |
 | `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTH` | аутентификация SMTP | —, —, `false` |
 | `SMTP_STARTTLS`, `SMTP_SSL` | 587 + STARTTLS или 465 + SSL | `false`, `false` |
