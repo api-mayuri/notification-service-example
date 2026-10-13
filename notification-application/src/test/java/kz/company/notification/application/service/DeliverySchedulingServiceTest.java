@@ -67,4 +67,21 @@ class DeliverySchedulingServiceTest {
 
         assertThat(context.deliveries.findById(id).orElseThrow().isDue(context.clock.instant())).isTrue();
     }
+
+    @Test
+    void pendingDeliveryWithLostMessageIsRequeued() {
+        context.givenActiveTemplate(ChannelType.EMAIL, "ru", null);
+        context.sendService.send(command("k", Category.TRANSACTIONAL, ChannelType.EMAIL));
+        DeliveryId id = context.dispatcher.dispatched().getFirst();
+
+        context.clock.advance(Duration.ofMinutes(5));
+        assertThat(context.schedulingService.recover()).isEqualTo(0);
+        context.clock.advance(Duration.ofMinutes(6));
+        assertThat(context.schedulingService.recover()).isEqualTo(1);
+
+        Delivery requeued = context.deliveries.findById(id).orElseThrow();
+        assertThat(requeued.status()).isEqualTo(DeliveryStatus.PENDING);
+        context.dispatcher.clear();
+        assertThat(context.schedulingService.dispatchDue()).isEqualTo(1);
+    }
 }

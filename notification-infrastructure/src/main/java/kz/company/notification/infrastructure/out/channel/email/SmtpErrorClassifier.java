@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
  */
 public final class SmtpErrorClassifier {
 
-    private static final Pattern REPLY_CODE = Pattern.compile("(?<![0-9])([45])[0-9]{2}(?=[ \\-.]|$)");
+    // Reply code only at line start or after ": " so ports/timeouts (e.g. "host:587") are not taken for 5xx.
+    private static final Pattern REPLY_CODE = Pattern.compile("(?:^|: )([45])[0-9]{2}(?=[ \\-]|$)", Pattern.MULTILINE);
 
     private SmtpErrorClassifier() {
     }

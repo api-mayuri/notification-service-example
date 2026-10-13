@@ -65,7 +65,7 @@ public class DeliverySchedulingService implements DispatchDueDeliveriesUseCase, 
             events.addAll(delivery.pullDomainEvents());
             deliveryRepository.save(delivery);
         }
-        List<Delivery> overdue = deliveryRepository.lockOverdueRetries(now.minus(settings.overdueRetryGrace()),
+        List<Delivery> overdue = deliveryRepository.lockOverdueDispatches(now.minus(settings.overdueRetryGrace()),
                 settings.batchSize());
         for (Delivery delivery : overdue) {
             delivery.requeue(now);

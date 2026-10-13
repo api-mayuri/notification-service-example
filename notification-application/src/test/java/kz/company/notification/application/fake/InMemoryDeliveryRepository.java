@@ -58,9 +58,9 @@ public final class InMemoryDeliveryRepository implements DeliveryRepository {
     }
 
     @Override
-    public List<Delivery> lockOverdueRetries(Instant dueBefore, int limit) {
-        return select(delivery -> delivery.status() == DeliveryStatus.RETRY_SCHEDULED
-                && delivery.dispatchedAt().isPresent()
+    public List<Delivery> lockOverdueDispatches(Instant dueBefore, int limit) {
+        return select(delivery -> delivery.status().isAwaitingSend()
+                && delivery.dispatchedAt().filter(dispatched -> dispatched.isBefore(dueBefore)).isPresent()
                 && delivery.nextAttemptAt().filter(next -> next.isBefore(dueBefore)).isPresent(), limit);
     }
 

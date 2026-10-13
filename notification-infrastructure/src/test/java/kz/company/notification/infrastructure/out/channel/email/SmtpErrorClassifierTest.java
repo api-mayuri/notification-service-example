@@ -45,6 +45,16 @@ class SmtpErrorClassifierTest {
     }
 
     @Test
+    void portsAndTimeoutsAreNotTakenForReplyCodes() {
+        MailSendException exception = new MailSendException("Mail server connection failed",
+                new jakarta.mail.MessagingException("Couldn't connect to host, port: smtp.company.kz, 587; timeout 5000",
+                        new ConnectException("Connection timed out: smtp.company.kz/10.0.0.1:587")));
+
+        assertThat(SmtpErrorClassifier.findReplyClass(exception)).isNull();
+        assertThat(SmtpErrorClassifier.classify(exception)).isInstanceOf(SendResult.RetryableFailure.class);
+    }
+
+    @Test
     void authenticationFailureIsRetryableAndBadMessageIsPermanent() {
         assertThat(SmtpErrorClassifier.classify(new MailAuthenticationException("535 Authentication failed")))
                 .isInstanceOf(SendResult.RetryableFailure.class);

@@ -13,6 +13,7 @@ import kz.company.notification.infrastructure.messaging.TopicNames;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.TopicConfig;
+import org.springframework.boot.kafka.autoconfigure.ConcurrentKafkaListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -20,12 +21,9 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.kafka.config.ContainerCustomizer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.retrytopic.RetryTopicConfiguration;
 import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
@@ -46,27 +44,6 @@ public class KafkaConfiguration {
     @Bean
     static DeliveryListenerRegistrar deliveryListenerRegistrar() {
         return new DeliveryListenerRegistrar();
-    }
-
-    /**
-     * Выделенный исполнитель для Kafka consumer threads. Виртуальные потоки устраняют ограничение
-     * platform thread pool при запуске большого числа listener containers одновременно.
-     */
-    @Bean
-    SimpleAsyncTaskExecutor kafkaListenerExecutor() {
-        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("kafka-listener-");
-        executor.setVirtualThreads(true);
-        return executor;
-    }
-
-    /**
-     * Применяет {@link #kafkaListenerExecutor()} к автоконфигурированной фабрике по умолчанию
-     * (используется {@code @KafkaListener} без явного containerFactory).
-     */
-    @Bean
-    ContainerCustomizer<Object, Object, KafkaMessageListenerContainer<Object, Object>> kafkaContainerCustomizer(
-            SimpleAsyncTaskExecutor kafkaListenerExecutor) {
-        return container -> container.getContainerProperties().setListenerTaskExecutor(kafkaListenerExecutor);
     }
 
     /**
@@ -105,14 +82,15 @@ public class KafkaConfiguration {
      */
     @Bean
     ConcurrentKafkaListenerContainerFactory<Object, Object> sendRequestContainerFactory(
+            ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
             ConsumerFactory<Object, Object> consumerFactory, KafkaTemplate<Object, Object> kafkaTemplate,
-            NotificationKafkaProperties properties, SimpleAsyncTaskExecutor kafkaListenerExecutor) {
+            NotificationKafkaProperties properties) {
+        // Boot defaults first (virtual-thread executor, observation), then our overrides.
         ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
+        configurer.configure(factory, consumerFactory);
         factory.setConcurrency(Math.min(3, properties.partitions()));
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         factory.getContainerProperties().setObservationEnabled(true);
-        factory.getContainerProperties().setListenerTaskExecutor(kafkaListenerExecutor);
 
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, exception) -> new TopicPartition(record.topic() + properties.deadLetterSuffix(), record.partition()));

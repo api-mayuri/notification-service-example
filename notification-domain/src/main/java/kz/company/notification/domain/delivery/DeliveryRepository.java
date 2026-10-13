@@ -30,10 +30,11 @@ public interface DeliveryRepository {
     List<Delivery> lockStaleSending(Instant updatedBefore, int limit);
 
     /**
-     * Доставки в RETRY_SCHEDULED, поставленные в топик, чей повтор должен был случиться
-     * раньше {@code dueBefore} (сообщение о повторе потеряно). Блокируются как выше.
+     * Доставки в PENDING или RETRY_SCHEDULED, поставленные в топик раньше {@code dueBefore},
+     * чья попытка должна была случиться раньше {@code dueBefore} (сообщение потеряно или
+     * ушло в DLT нечитаемым). Блокируются как выше.
      */
-    List<Delivery> lockOverdueRetries(Instant dueBefore, int limit);
+    List<Delivery> lockOverdueDispatches(Instant dueBefore, int limit);
 
     /** Использование лимита частоты: отправки получателю по каналу начиная с {@code since}. */
     RateWindowUsage rateWindowUsage(RecipientId recipientId, ChannelType channel, Instant since);

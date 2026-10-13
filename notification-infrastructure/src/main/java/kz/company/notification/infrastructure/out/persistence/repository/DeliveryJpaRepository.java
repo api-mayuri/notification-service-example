@@ -40,14 +40,14 @@ public interface DeliveryJpaRepository extends JpaRepository<DeliveryJpaEntity, 
 
     @Query(value = """
             select * from delivery
-            where status = 'RETRY_SCHEDULED'
-              and dispatched_at is not null
+            where status in ('PENDING', 'RETRY_SCHEDULED')
+              and dispatched_at < :dueBefore
               and next_attempt_at < :dueBefore
             order by next_attempt_at
             limit :limit
             for update skip locked
             """, nativeQuery = true)
-    List<DeliveryJpaEntity> lockOverdueRetries(@Param("dueBefore") Instant dueBefore, @Param("limit") int limit);
+    List<DeliveryJpaEntity> lockOverdueDispatches(@Param("dueBefore") Instant dueBefore, @Param("limit") int limit);
 
     @Query("""
             select count(d), min(d.sentAt) from DeliveryJpaEntity d

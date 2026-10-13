@@ -79,6 +79,10 @@ spring:
       completion-mode: delete
       externalization:
         enabled: true
+      # Otherwise Modulith registers a JSON RecordMessageConverter and the whole ExternalMessage
+      # wrapper is sent instead of its payload; ExternalMessageSerializer writes the value.
+      kafka:
+        enable-json: false
 
   mvc:
     problemdetails:

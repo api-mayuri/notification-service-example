@@ -86,6 +86,11 @@ class NotificationFlowIT extends IntegrationTestSupport {
                     .contains("kz.company.notification.delivery.sent.v1",
                             "kz.company.notification.notification.completed.v1");
             assertThat(kafkaHeader(events.getFirst(), "ce_specversion")).isEqualTo("1.0");
+            // The value is the event data itself, not a wrapper with an escaped payload.
+            assertThat(events).allSatisfy(record -> {
+                assertThat((String) JsonPath.read(record.value(), "$.notificationId")).isEqualTo(id);
+                assertThat(record.headers().lastHeader("__TypeId__")).isNull();
+            });
         });
     }
 

@@ -38,8 +38,9 @@ public class DeliveryListenerRegistrar implements BeanDefinitionRegistryPostProc
         Map<String, ChannelListenerSettings> channels = binder
                 .bind("notification.channels", Bindable.mapOf(String.class, ChannelListenerSettings.class))
                 .orElse(Map.of());
-        TopicNames topicNames = new TopicNames(
-                binder.bindOrCreate("notification.kafka", NotificationKafkaProperties.class));
+        NotificationKafkaProperties kafkaProperties =
+                binder.bindOrCreate("notification.kafka", NotificationKafkaProperties.class);
+        TopicNames topicNames = new TopicNames(kafkaProperties);
         ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
 
         channels.forEach((code, settings) -> {
@@ -49,7 +50,9 @@ public class DeliveryListenerRegistrar implements BeanDefinitionRegistryPostProc
             ChannelType channel = ChannelType.of(code);
             for (TopicNames.Lane lane : TopicNames.Lane.values()) {
                 String beanName = "delivery-" + channel.lowerCaseCode() + "-" + lane.name().toLowerCase(Locale.ROOT);
-                int concurrency = lane == TopicNames.Lane.HIGH ? settings.highPriorityConcurrency() : settings.concurrency();
+                // Consumers beyond the partition count would sit idle.
+                int concurrency = Math.min(kafkaProperties.partitions(),
+                        lane == TopicNames.Lane.HIGH ? settings.highPriorityConcurrency() : settings.concurrency());
                 RootBeanDefinition definition = new RootBeanDefinition(ChannelDeliveryListener.class,
                         () -> new ChannelDeliveryListener(beanName, topicNames.deliveryLane(channel, lane),
                                 topicNames.deliveryConsumerGroup(channel, lane), concurrency,

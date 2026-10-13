@@ -17,5 +17,8 @@ databaseChangeLog:
       file: changes/005-create-event-publication.sql
       relativeToChangelogFile: true
   - include:
+      file: changes/006-delivery-overdue-dispatch-index.sql
+      relativeToChangelogFile: true
+  - include:
       file: changes/100-seed-templates.sql
       relativeToChangelogFile: true

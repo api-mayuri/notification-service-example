@@ -62,8 +62,8 @@ public class JpaDeliveryRepositoryAdapter implements DeliveryRepository {
     }
 
     @Override
-    public List<Delivery> lockOverdueRetries(Instant dueBefore, int limit) {
-        return jpaRepository.lockOverdueRetries(dueBefore, limit).stream().map(mapper::toDomain).toList();
+    public List<Delivery> lockOverdueDispatches(Instant dueBefore, int limit) {
+        return jpaRepository.lockOverdueDispatches(dueBefore, limit).stream().map(mapper::toDomain).toList();
     }
 
     @Override
