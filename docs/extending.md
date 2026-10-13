@@ -153,7 +153,7 @@ public class GrpcRecipientResolver implements RecipientResolver {
 | Число попыток и задержки | `notification.retry.*` — одновременно для Kafka и домена |
 | Логика задержки (например, фиксированная) | бин `retryPolicy` в `UseCaseConfiguration` |
 | Какие ошибки временные | в своём провайдере: `RetryableFailure` или `PermanentFailure`; SMTP — `SmtpErrorClassifier` |
-| Лимиты частоты | `notification.delivery.rate-limits.<канал>` (обязательно с `categories`) |
+| Лимиты частоты | `notification.delivery.rate-limits.<канал>` (по умолчанию только для `MARKETING`) |
 | Какие категории обязательные и учитывают тихие часы | `Category.respectsQuietHours()` и соседние методы (`domain/notification/Category`) |
 | Тихие часы | `QuietHoursPolicy` (сейчас — сдвиг на конец тихих часов в поясе получателя) |
 | Выбор каналов (отписки, нет контакта) | `ChannelSelectionPolicy` |

@@ -59,7 +59,7 @@
 | `notification.delivery.idempotency-key-retention` | `7d` (`24h` в коде) | срок хранения ключей идемпотентности |
 | `notification.delivery.rate-limits.<канал>.max` | — | не больше `max` отправок получателю по каналу… |
 | `notification.delivery.rate-limits.<канал>.window` | — | …за окно; лишние откладываются, а не отбрасываются |
-| `notification.delivery.rate-limits.<канал>.categories` | — | к каким категориям применяется. **Если не задано — ни к каким**, лимит не действует |
+| `notification.delivery.rate-limits.<канал>.categories` | — | к каким категориям применяется; если не задано — `MARKETING` |
 
 ```yaml
 notification:

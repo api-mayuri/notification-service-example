@@ -8,7 +8,7 @@
 
 - Документация разделена: для разработчиков — `README.md` и `docs/` (`architecture.md`, `integration.md`, `configuration.md`, `extending.md`); для ИИ — `CLAUDE.md` и `ai/` (этот журнал, `plan.md`, `research.md`).
 - Раздел «Что НЕ проверено» ниже исторический: `./mvnw verify` на JDK 25 проходит. Не проверен только `docker compose up` вручную.
-- Найдено при описании настроек: `notification.delivery.rate-limits.<канал>` без `categories` не действует ни на одну категорию (JavaDoc `NotificationProperties` обещает MARKETING по умолчанию). Задокументировано, код не менялся.
+- Найдено при описании настроек: `notification.delivery.rate-limits.<канал>` без `categories` не действует ни на одну категорию (JavaDoc `NotificationProperties` обещает MARKETING по умолчанию). Исправлено: без `categories` лимит применяется к MARKETING (`UseCaseConfiguration`, тест `UseCaseConfigurationTest`).
 
 ## Исправления после первого прогона (2026-10-13)
 

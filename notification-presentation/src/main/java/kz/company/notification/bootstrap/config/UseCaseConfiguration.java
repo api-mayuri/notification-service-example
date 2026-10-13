@@ -171,7 +171,8 @@ public class UseCaseConfiguration {
 
     private static Set<Category> categories(Set<String> names) {
         if (names == null || names.isEmpty()) {
-            return Set.of();
+            // Documented default: only optional (marketing) traffic is throttled.
+            return EnumSet.of(Category.MARKETING);
         }
         Set<Category> categories = EnumSet.noneOf(Category.class);
         names.forEach(name -> categories.add(Category.valueOf(name.strip().toUpperCase(Locale.ROOT))));
