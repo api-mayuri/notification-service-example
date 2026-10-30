@@ -21,7 +21,9 @@ const OUT = process.argv[2];
         if (!localStorage.getItem('RaStore.locale')) localStorage.setItem('RaStore.locale', '"en"');
     });
     const page = await context.newPage();
+    let index = 0;
     const shot = async (name, full = true) => {
+        name = `${String(++index).padStart(2, '0')}-${name.replace(/^\d+-/, '')}`;
         // Hide-on-scroll app bar and the focus-only "Skip to content" button spoil full-page shots.
         if (full) await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0); });
         await page.mouse.move(0, 0);
@@ -80,8 +82,48 @@ const OUT = process.argv[2];
     await page.getByRole('button', { name: 'Preview' }).last().click();
     await page.getByText('v1 · ru').waitFor();
     await shot('10-template-preview');
+    // Live preview: HTML + CSS email template.
     await go('/templates/create', 'Required variables');
-    await shot('11-template-create');
+    await page.locator('input[name="key"]').fill('order-delivered');
+    await page.locator('input[name="subject"]').fill('Order [(${orderId})] delivered');
+    await page.getByRole('button', { name: 'Insert <style> (CSS)' }).click();
+    const body = page.locator('textarea[name="body"]');
+    await body.press('ControlOrMeta+End');
+    await body.pressSequentially(
+        '<div class="container"><h2>Hi, <span th:text="${name}">customer</span>!</h2>' +
+            '<p>Your order <b th:text="${orderId}">ORD</b> has been delivered.</p>' +
+            '<a class="button" th:href="${trackingUrl}">Rate the delivery</a></div>',
+        { delay: 0 },
+    );
+    await page.getByRole('button', { name: 'Detect variables' }).click();
+    await page.getByLabel('name', { exact: true }).fill('Anna');
+    await page.getByLabel('orderId', { exact: true }).fill('ORD-42');
+    await shot('11-template-create-html-css');
+
+    // Live preview: Markdown for a text channel, mobile width (reload: a fresh form).
+    await page.goto(`${BASE}/#/templates/create`);
+    await page.reload();
+    await page.getByText('Required variables', { exact: true }).first().waitFor();
+    await page.locator('input[name="key"]').fill('order-shipped-md');
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option', { name: 'TELEGRAM' }).click();
+    await page.locator('input[name="subject"]').fill('Order [(${orderId})] shipped');
+    await page.locator('textarea[name="body"]').fill(
+        '## Order [(${orderId})] shipped\n\n**Courier:** [(${courier})]\n\n- Track: [link](https://example.com/t/42)\n- Questions? Reply to this message',
+    );
+    await page.getByLabel('orderId', { exact: true }).fill('ORD-42');
+    await page.getByLabel('courier', { exact: true }).fill('Kazpost');
+    await page.locator('button[value="mobile"]').click();
+    await shot('12-template-create-markdown-mobile');
+
+    // Live preview in the "new version" dialog (editing a template).
+    await go('/templates/00000000-0000-7000-8000-000000000006/show', 'Versions');
+    await page.getByRole('button', { name: 'New version based on this' }).first().click();
+    await page.getByRole('dialog').getByLabel('orderId', { exact: true }).fill('ORD-77');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await shot('13-template-new-version-preview', false);
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 1440, height: 900 });
 
     await go('/preferences?recipientId=user-42', 'Unsubscribed channels');
     await shot('12-preferences');

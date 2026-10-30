@@ -13,6 +13,8 @@
 - **Найдено на бэкенде, не исправлено:** в `/actuator/health` нет индикатора circuit breaker'ов, хотя `docs/configuration.md` и ADR 0011 его обещают (`register-health-indicator: true` есть, но для resilience4j-spring-boot4, видимо, нужен ещё `management.health.circuitbreakers.enabled: true`). Фронт читает состояние из метрик `resilience4j.circuitbreaker.state`/`failure.rate`, health — запасной вариант.
 - Скриншоты всех страниц (английский UI) — `docs/screenshots/`, снимаются `frontend/scripts/screenshots.cjs` (Playwright, язык через `RaStore.locale`).
 - Исправлено по e2e: `requireAuth` у `<Admin>` с собственной страницей входа зацикливал её рендер (react-admin 5.15) — свои страницы обёрнуты в `<Authenticated>`; после создания уведомления в кэш попадал ответ `202` без `deliveries` — `create` теперь возвращает полный `NotificationView`; `useDataProvider()` возвращает новый прокси на каждый рендер — не класть его в зависимости эффектов.
+- Стек фронта обновлён до Vite 8 (Rolldown), TypeScript 7, Vitest 5, MUI 9, Node 24 в образе. MUI 9 убрал system props — перенесены в `sx` скриптом (76 тегов). react-router остаётся 7: react-admin 5.15 не поддерживает 8.
+- Живое превью шаблонов (`src/templates/`): клиентское приближение Thymeleaf + Markdown (`marked`) в `iframe sandbox`. Сервер Markdown не рендерит — это только превью.
 - `npm audit`: транзитивная уязвимость `decode-uri-component` (через `query-string` в `ra-core`), исправления в react-admin 5.15.5 нет.
 - Открыто: вход через OIDC (сейчас dev-токен или вставка токена IdP); CORS на бэкенде не нужен, пока UI ходит через nginx/Vite proxy.
 

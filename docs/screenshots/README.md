@@ -46,40 +46,50 @@
 
 ![Template preview](10-template-preview.png)
 
-![Create template](11-template-create.png)
+**Живое превью при создании** — редактор слева, рендер справа с тестовыми значениями переменных. HTML + CSS: кнопка «Insert `<style>`» добавляет заготовку стилей, `th:text` / `th:href` / `[(${x})]` подставляются сразу.
+
+![Create template: HTML + CSS live preview](11-template-create-html-css.png)
+
+**Markdown** (формат определяется автоматически, можно переключить на HTML / MD / Text) в мобильной ширине 375 px.
+
+![Create template: Markdown, mobile width](12-template-create-markdown-mobile.png)
+
+**Редактирование** — новая версия шаблона (версии неизменяемы) с тем же превью.
+
+![New version with live preview](13-template-new-version-preview.png)
 
 ## Предпочтения и статистика
 
 **Предпочтения получателя** — отписки, тихие часы, часовой пояс, локаль; сохранение целиком (PUT) и точечная очистка (PATCH).
 
-![Preferences](12-preferences.png)
+![Preferences](14-preferences.png)
 
-![Statistics](13-statistics.png)
+![Statistics](15-statistics.png)
 
 ## Каналы и провайдеры
 
 **Каналы** — включён ли канал, состояние circuit breaker, текущий провайдер (реальный или заглушка-логер), счётчики отправок по исходам.
 
-![Channels and providers](14-channels-and-providers.png)
+![Channels and providers](16-channels-and-providers.png)
 
 **Лог заглушки** — последние доставки канала в формате строк, которые пишет логирующий провайдер.
 
-![Stub log](15-stub-log.png)
+![Stub log](17-stub-log.png)
 
 **Подключение провайдера** — выбор провайдера (встроенный или заготовка), настройки и готовые `.env`, `application.yml`, каркас Java-класса.
 
-![Connect provider: settings](16-connect-provider-settings.png)
+![Connect provider: settings](18-connect-provider-settings.png)
 
-![Connect provider: Java skeleton](17-connect-provider-java.png)
+![Connect provider: Java skeleton](19-connect-provider-java.png)
 
 **Проверка подписи вебхука** — HMAC-SHA256 `X-Notification-Signature`.
 
-![Webhook signature check](18-webhook-signature.png)
+![Webhook signature check](20-webhook-signature.png)
 
 ## Система
 
 **Система** — дерево health, текущий токен и scopes, Kafka-топики и типы событий, ссылки на инструменты, настройки фронтенда.
 
-![System](19-system.png)
+![System](21-system.png)
 
-![Dashboard, dark theme](20-dashboard-dark.png)
+![Dashboard, dark theme](22-dashboard-dark.png)
