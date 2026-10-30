@@ -48,7 +48,7 @@ export const LoggerConsole = ({ channel, provider }: { channel: string; provider
     const logCommand = `docker compose logs -f notification-service | grep "Stub ${channel} provider"`;
     return (
         <Box>
-            <Typography variant="body2" color="text.secondary" mb={1}>
+            <Typography sx={{ mb: 1 }} variant="body2" color="text.secondary">
                 {translate('app.provider.console_help', { implementation: provider.implementation })}
             </Typography>
             {isPending && <CircularProgress size={20} />}
@@ -79,10 +79,10 @@ export const LoggerConsole = ({ channel, provider }: { channel: string; provider
                     ))}
                 </Box>
             )}
-            <Stack direction="row" spacing={1} mt={1} useFlexGap flexWrap="wrap">
+            <Stack sx={{ mt: 1, flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                 {data?.some(line => line.delivery.simulated) && <Chip size="small" color="warning" label="simulated=true" />}
             </Stack>
-            <Typography variant="subtitle2" mt={2}>
+            <Typography sx={{ mt: 2 }} variant="subtitle2">
                 {translate('app.provider.real_log')}
             </Typography>
             <CodeBlock code={logCommand} />

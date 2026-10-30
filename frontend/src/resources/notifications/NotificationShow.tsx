@@ -53,7 +53,7 @@ const DeliveryProgress = () => {
     }, {});
     const live = !TERMINAL_NOTIFICATION_STATUSES.includes(record.status) && config.pollIntervalMs > 0;
     return (
-        <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+        <Stack sx={{ alignItems: 'center', flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
             <StatusChip status={record.status} size="medium" />
             {Object.entries(counts).map(([status, count]) => (
                 <Chip key={status} size="small" variant="outlined" label={`${translate(`app.status.${status}`, { _: status })}: ${count}`} />
@@ -75,7 +75,7 @@ const Summary = () => {
         <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
                 <Labeled label="app.field.id">
-                    <Stack direction="row" alignItems="center">
+                    <Stack sx={{ alignItems: 'center' }} direction="row">
                         <TextField source="id" sx={{ fontFamily: 'monospace' }} />
                         <CopyButton text={record.id} />
                     </Stack>
@@ -135,7 +135,7 @@ const Summary = () => {
             {record.metadata && Object.keys(record.metadata).length > 0 && (
                 <Grid size={12}>
                     <Labeled label="app.field.metadata">
-                        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                        <Stack sx={{ flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                             {Object.entries(record.metadata).map(([key, value]) => (
                                 <Chip key={key} size="small" label={`${key}: ${value}`} />
                             ))}
@@ -166,7 +166,7 @@ const ProviderMessage = (_props: { label?: string }) => {
     const translate = useTranslate();
     if (!record?.providerMessageId) return null;
     return (
-        <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack sx={{ alignItems: 'center' }} direction="row" spacing={0.5}>
             <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 12 }}>
                 {record.providerMessageId}
             </Typography>
@@ -195,12 +195,12 @@ export const NotificationShow = () => (
         <Card variant="outlined" sx={{ m: 2 }}>
             <CardContent>
                 <DeliveryProgress />
-                <Box mt={2}>
+                <Box sx={{ mt: 2 }}>
                     <Summary />
                 </Box>
             </CardContent>
         </Card>
-        <Box px={2} pb={2}>
+        <Box sx={{ px: 2, pb: 2 }}>
             <Typography variant="h6" gutterBottom>
                 <DeliveriesTitle />
             </Typography>

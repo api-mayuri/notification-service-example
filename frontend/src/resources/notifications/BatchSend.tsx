@@ -139,14 +139,14 @@ export const BatchSend = () => {
     };
 
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={translate('app.page.batch')} />
             <Card variant="outlined">
                 <CardContent>
-                    <Typography variant="body2" color="text.secondary" mb={2}>
+                    <Typography sx={{ mb: 2 }} variant="body2" color="text.secondary">
                         {translate('app.help.batch', { max: LIMITS.batchSize })}
                     </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                    <Stack sx={{ alignItems: 'center', mb: 2 }} direction="row" spacing={1}>
                         <TextField
                             label={translate('app.field.idempotencyKey')}
                             value={key}
@@ -222,7 +222,7 @@ export const BatchSend = () => {
                             {translate(error, { _: error })}
                         </Alert>
                     )}
-                    <Box mt={2}>
+                    <Box sx={{ mt: 2 }}>
                         <Button variant="contained" startIcon={<SendIcon />} onClick={submit} disabled={loading || !key.trim()}>
                             {translate('app.action.send_batch')}
                         </Button>
@@ -232,7 +232,7 @@ export const BatchSend = () => {
             {result && (
                 <Card variant="outlined" sx={{ mt: 2 }}>
                     <CardContent>
-                        <Stack direction="row" spacing={1} mb={2}>
+                        <Stack sx={{ mb: 2 }} direction="row" spacing={1}>
                             <Chip color="success" label={`${translate('app.field.accepted')}: ${result.accepted}`} />
                             <Chip color={result.rejected ? 'warning' : 'default'} label={`${translate('app.field.rejected')}: ${result.rejected}`} />
                         </Stack>

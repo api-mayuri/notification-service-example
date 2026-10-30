@@ -29,7 +29,7 @@ export const ChannelsField = ({ source }: { source: string; label?: string; sort
     const value = record?.[source];
     const channels: string[] = Array.isArray(value) ? value : value ? [value] : [];
     return (
-        <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap">
+        <Stack sx={{ flexWrap: 'wrap' }} direction="row" spacing={0.5} useFlexGap>
             {channels.map(channel => (
                 <ChannelChip key={channel} channel={channel} />
             ))}

@@ -32,6 +32,7 @@ export const en: Messages<typeof ru> = {
             preview: 'Preview',
             variants: 'Channels and locales of the key',
             raw_html: 'HTML (variables not substituted)',
+            rendered: 'Rendered (%{format}, no variables)',
             deliveries_by_period: 'Deliveries by period',
             totals_by_channel: 'Totals by channel',
         },
@@ -50,6 +51,7 @@ export const en: Messages<typeof ru> = {
             new_version_from: 'New version based on this',
             template_settings: 'Deduplication',
             detect_variables: 'Detect variables',
+            insert_style: 'Insert <style> (CSS)',
             save_replace: 'Save (PUT)',
             clear_quiet_hours: 'Clear quiet hours (PATCH)',
             clear_locale: 'Clear locale (PATCH)',
@@ -344,6 +346,16 @@ export const en: Messages<typeof ru> = {
                 signing_secret: 'Signing secret',
                 require_https: 'HTTPS URLs only',
             },
+        },
+        preview: {
+            title: 'Live preview',
+            auto: 'Auto: %{format}',
+            text: 'Text',
+            desktop: 'Desktop',
+            mobile: 'Mobile (375 px)',
+            markdown_note:
+                'Markdown is rendered in the preview only: the service sends the template as is (Thymeleaf HTML for EMAIL, TEXT for other channels). Useful for providers that understand Markdown (e.g. Telegram parse_mode).',
+            hint: 'Rendered in the browser with test values; the exact server render is the Preview tab of a saved version.',
         },
         webhook: {
             tool: 'Signature check',

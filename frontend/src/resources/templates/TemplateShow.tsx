@@ -46,6 +46,7 @@ import { CodeBlock } from '../../components/CodeBlock';
 import { HtmlPreview } from '../../components/HtmlPreview';
 import { StatusChip } from '../../components/StatusChip';
 import { humanizeDuration } from '../../utils/duration';
+import { detectFormat, renderPreviewDocument } from '../../templates/render';
 import { AddVersionDialog, SettingsDialog, useDialog } from './TemplateDialogs';
 import { TemplatePreviewPanel } from './TemplatePreviewPanel';
 
@@ -115,8 +116,8 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                 // status in the key: remount (and re-apply defaultExpanded) when a version gets activated
                 <Accordion key={`${version.version}-${version.status}`} variant="outlined" defaultExpanded={version.status === 'ACTIVE'} disableGutters>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Stack direction="row" spacing={1} alignItems="center" width="100%" flexWrap="wrap" useFlexGap>
-                            <Typography fontWeight={600}>v{version.version}</Typography>
+                        <Stack sx={{ alignItems: 'center', width: '100%', flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
+                            <Typography sx={{ fontWeight: 600 }}>v{version.version}</Typography>
                             <StatusChip status={version.status} />
                             <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }} noWrap>
                                 {version.subject ?? ''}
@@ -127,7 +128,7 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                         </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Stack direction="row" spacing={1} mb={2} useFlexGap flexWrap="wrap">
+                        <Stack sx={{ mb: 2, flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                             <ActivateButton version={version} />
                             <Button size="small" startIcon={<VisibilityIcon />} onClick={() => onPreview(version.version)}>
                                 {translate('app.action.preview')}
@@ -137,7 +138,7 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                             </Button>
                         </Stack>
                         <Typography variant="subtitle2">{translate('app.field.requiredVariables')}</Typography>
-                        <Stack direction="row" spacing={0.5} mb={2} useFlexGap flexWrap="wrap">
+                        <Stack sx={{ mb: 2, flexWrap: 'wrap' }} direction="row" spacing={0.5} useFlexGap>
                             {version.requiredVariables.length ? (
                                 version.requiredVariables.map(name => <Chip key={name} size="small" label={name} />)
                             ) : (
@@ -145,22 +146,22 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                             )}
                         </Stack>
                         <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, md: record.channel === 'EMAIL' ? 6 : 12 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <Typography variant="subtitle2">{translate(record.channel === 'EMAIL' ? 'app.field.html_body' : 'app.field.body')}</Typography>
                                 <CodeBlock code={version.body} maxHeight={320} />
                                 {version.textBody && (
-                                    <Box mt={2}>
+                                    <Box sx={{ mt: 2 }}>
                                         <Typography variant="subtitle2">{translate('app.field.text_body')}</Typography>
                                         <CodeBlock code={version.textBody} maxHeight={200} />
                                     </Box>
                                 )}
                             </Grid>
-                            {record.channel === 'EMAIL' && (
-                                <Grid size={{ xs: 12, md: 6 }}>
-                                    <Typography variant="subtitle2">{translate('app.section.raw_html')}</Typography>
-                                    <HtmlPreview html={version.body} />
-                                </Grid>
-                            )}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Typography variant="subtitle2">
+                                    {translate('app.section.rendered', { format: detectFormat(version.body).toUpperCase() })}
+                                </Typography>
+                                <HtmlPreview html={renderPreviewDocument(version.body, detectFormat(version.body))} />
+                            </Grid>
                         </Grid>
                     </AccordionDetails>
                 </Accordion>
@@ -272,7 +273,7 @@ const Body = () => {
                     <Header />
                 </CardContent>
             </Card>
-            <Box px={2} pb={2}>
+            <Box sx={{ px: 2, pb: 2 }}>
                 <Tabs value={tab} onChange={(_, value) => setTab(value)} sx={{ mb: 2 }}>
                     <Tab label={translate('app.section.versions')} />
                     <Tab label={translate('app.section.preview')} />

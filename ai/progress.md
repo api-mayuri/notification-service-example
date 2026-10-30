@@ -1,8 +1,22 @@
 # Прогресс
 
 - **Сессия:** 1
-- **Дата:** 2026-09-26
+- **Дата:** 2026-09-26 (последнее обновление 2026-10-30: админка)
 - **Статус:** этапы 0–10 выполнены в коде и документации. 2026-10-13: `./mvnw verify` на JDK 25 проходит полностью, включая все `*IT` (см. «Исправления после первого прогона»).
+
+## Админка (2026-10-30)
+
+- `frontend/`: react-admin 5, React 19, MUI 7, Vite 7, TypeScript 5.9. Покрыт весь REST: уведомления (поиск, карточка, отправка, отмена, пакет), шаблоны (CRUD-подобные операции, версии, активация, предпросмотр, дедупликация, `GET /{key}`), предпочтения (GET/PUT/PATCH), статистика, actuator (health, info, metrics). Kafka — генерация CloudEvents-команды для `kafka-console-producer` и справка по топикам/событиям.
+- Провайдеры: реестр `src/channels/providers/{builtIn,planned}.ts`, мастер «Подключить провайдера» генерирует `.env`, `application.yml` и каркас `*Provider`. Для заглушек — «лог» из последних доставок канала. Бэкенд API провайдеров не имеет: текущий провайдер фронт берёт из `CHANNEL_PROVIDERS` (compose собирает её из тех же `<КАНАЛ>_PROVIDER`, что передаёт сервису как `NOTIFICATION_CHANNELS_<КАНАЛ>_PROVIDER`).
+- Docker: `frontend/Dockerfile` (npm ci, тесты, tsc, vite build → nginx 1.29). nginx проксирует `/api`, `/dev`, `/actuator`, `/v3/api-docs`, `/swagger-ui*`, резолвит бэкенд на каждый запрос (`resolver` + переменная). Runtime-настройки — `/config.js` из env (`docker/40-app-config.sh`). Сервис `frontend` в compose, порт 3000; корневой `.env.example`. В корневой `.dockerignore` добавлен `frontend/` (иначе `node_modules` попадал в контекст сборки бэкенда).
+- Проверено: `npm test` (47 тестов), `npm run build`; образ фронта собран (тесты внутри сборки), стек `docker compose up` (без Kafka UI: ghcr.io закрыт сетью среды) и e2e-сценарий Playwright по всем разделам.
+- **Найдено на бэкенде, не исправлено:** в `/actuator/health` нет индикатора circuit breaker'ов, хотя `docs/configuration.md` и ADR 0011 его обещают (`register-health-indicator: true` есть, но для resilience4j-spring-boot4, видимо, нужен ещё `management.health.circuitbreakers.enabled: true`). Фронт читает состояние из метрик `resilience4j.circuitbreaker.state`/`failure.rate`, health — запасной вариант.
+- Скриншоты всех страниц (английский UI) — `docs/screenshots/`, снимаются `frontend/scripts/screenshots.cjs` (Playwright, язык через `RaStore.locale`).
+- Исправлено по e2e: `requireAuth` у `<Admin>` с собственной страницей входа зацикливал её рендер (react-admin 5.15) — свои страницы обёрнуты в `<Authenticated>`; после создания уведомления в кэш попадал ответ `202` без `deliveries` — `create` теперь возвращает полный `NotificationView`; `useDataProvider()` возвращает новый прокси на каждый рендер — не класть его в зависимости эффектов.
+- Стек фронта обновлён до Vite 8 (Rolldown), TypeScript 7, Vitest 5, MUI 9, Node 24 в образе. MUI 9 убрал system props — перенесены в `sx` скриптом (76 тегов). react-router остаётся 7: react-admin 5.15 не поддерживает 8.
+- Живое превью шаблонов (`src/templates/`): клиентское приближение Thymeleaf + Markdown (`marked`) в `iframe sandbox`. Сервер Markdown не рендерит — это только превью.
+- `npm audit`: транзитивная уязвимость `decode-uri-component` (через `query-string` в `ra-core`), исправления в react-admin 5.15.5 нет.
+- Открыто: вход через OIDC (сейчас dev-токен или вставка токена IdP); CORS на бэкенде не нужен, пока UI ходит через nginx/Vite proxy.
 
 ## Документация (2026-10-13)
 

@@ -27,7 +27,7 @@ const Recent = () => {
                     <ListItemButton key={item.id} component={Link} to={`/notifications/${item.id}/show`}>
                         <ListItemText
                             primary={
-                                <Stack direction="row" spacing={1} alignItems="center">
+                                <Stack sx={{ alignItems: 'center' }} direction="row" spacing={1}>
                                     <span>{item.recipientId}</span>
                                     {item.channels.map(channel => (
                                         <ChannelChip key={channel} channel={channel} />
@@ -40,7 +40,7 @@ const Recent = () => {
                     </ListItemButton>
                 ))}
                 {data?.length === 0 && (
-                    <Typography color="text.secondary" p={2}>
+                    <Typography sx={{ p: 2 }} color="text.secondary">
                         {translate('app.message.no_data')}
                     </Typography>
                 )}
@@ -66,9 +66,9 @@ export const Dashboard = () => {
         }
     }, [canRead, load]);
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={config.title} />
-            <Stack direction="row" spacing={1} mb={2} alignItems="center" useFlexGap flexWrap="wrap">
+            <Stack sx={{ mb: 2, alignItems: 'center', flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                 <Typography variant="h5" sx={{ flexGrow: 1 }}>
                     {translate('app.dashboard.welcome')}
                 </Typography>
@@ -90,7 +90,7 @@ export const Dashboard = () => {
             </Stack>
             {canRead && stats.data && <StatisticsKpis data={stats.data} />}
             {canRead && (
-                <Grid container spacing={2} mt={0}>
+                <Grid sx={{ mt: 0 }} container spacing={2}>
                     <Grid size={{ xs: 12, lg: 7 }}>
                         <Card variant="outlined" sx={{ height: '100%' }}>
                             <CardHeader title={translate('app.dashboard.last_7_days')} />

@@ -114,9 +114,9 @@ const TemplateHints = () => {
     if (!canList) return null;
     const missingChannels = channels.filter(channel => variants.length && !variants.some(v => v.channel === channel));
     return (
-        <Box mb={1}>
-            <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" alignItems="center">
-                <Typography variant="caption" color="text.secondary" mr={1}>
+        <Box sx={{ mb: 1 }}>
+            <Stack sx={{ flexWrap: 'wrap', alignItems: 'center' }} direction="row" spacing={0.5} useFlexGap>
+                <Typography sx={{ mr: 1 }} variant="caption" color="text.secondary">
                     {translate('app.help.available_templates')}
                 </Typography>
                 {keys.map(item => (
@@ -130,7 +130,7 @@ const TemplateHints = () => {
                 ))}
             </Stack>
             {variants.length > 0 && (
-                <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+                <Typography sx={{ display: 'block', mt: 1 }} variant="caption" color="text.secondary">
                     {translate('app.help.template_variants', {
                         variants: variants.map(v => `${v.channel}/${v.locale}${v.activeVersion ? '' : ' (draft)'}`).join(', '),
                     })}
@@ -150,14 +150,14 @@ const ContactInputs = () => {
     const channels: string[] = useWatch({ name: 'channels' }) ?? [];
     const needed = new Set(channels.map(channel => CHANNEL_CONTACT[channel]).filter(Boolean));
     return (
-        <Box width="100%">
+        <Box sx={{ width: '100%' }}>
             <Typography variant="subtitle2" gutterBottom>
                 {translate('app.section.contacts')}
             </Typography>
-            <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+            <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">
                 {translate('app.help.contacts')}
             </Typography>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} useFlexGap flexWrap="wrap">
+            <Stack sx={{ flexWrap: 'wrap' }} direction={{ xs: 'column', md: 'row' }} spacing={2} useFlexGap>
                 {CONTACT_TYPES.map(type => (
                     <TextInput
                         key={type}
@@ -213,7 +213,7 @@ const ContentInputs = () => {
     const translate = useTranslate();
     if (mode === 'content') {
         return (
-            <Box width="100%">
+            <Box sx={{ width: '100%' }}>
                 {!hasScope(permissions, SCOPES.sendRaw) && (
                     <Alert severity="warning" sx={{ mb: 1 }}>
                         {translate('app.help.raw_scope_missing')}
@@ -226,7 +226,7 @@ const ContentInputs = () => {
         );
     }
     return (
-        <Box width="100%">
+        <Box sx={{ width: '100%' }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <TextInput source="templateKey" label="app.field.templateKey" validate={required()} sx={{ minWidth: 260 }} />
                 <TextInput source="templateLocale" label="app.field.locale" helperText="app.help.locale" sx={{ minWidth: 200 }} />
@@ -326,7 +326,7 @@ export const NotificationCreate = () => {
                 </Stack>
                 <KeyValueInput source="metadata" label="app.field.metadata" helperText="app.help.metadata" />
                 <RequestPreview />
-                <Box mt={1}>
+                <Box sx={{ mt: 1 }}>
                     <Button size="small" href={config.mailpitUrl} target="_blank" rel="noreferrer">
                         {translate('app.action.open_mailpit')}
                     </Button>

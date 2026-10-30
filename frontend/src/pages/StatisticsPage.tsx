@@ -113,7 +113,7 @@ export const StatisticsChart = ({ data, granularity, height = 320 }: { data: Sta
     };
     if (!points.length) {
         return (
-            <Typography color="text.secondary" textAlign="center" py={4}>
+            <Typography sx={{ textAlign: 'center', py: 4 }} color="text.secondary">
                 {translate('app.message.no_data')}
             </Typography>
         );
@@ -182,11 +182,11 @@ export const StatisticsPage = () => {
         ? DELIVERY_STATUSES.filter(status => Object.values(stats.data!.totals).some(byStatus => byStatus[status]))
         : [];
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={translate('app.menu.statistics')} />
             <Card variant="outlined" sx={{ mb: 2 }}>
                 <CardContent>
-                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
+                    <Stack sx={{ alignItems: { md: 'center' } }} direction={{ xs: 'column', md: 'row' }} spacing={2}>
                         <TextField
                             type="datetime-local"
                             size="small"
@@ -227,7 +227,7 @@ export const StatisticsPage = () => {
                             {translate('app.action.apply')}
                         </Button>
                     </Stack>
-                    <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+                    <Typography sx={{ display: 'block', mt: 1 }} variant="caption" color="text.secondary">
                         {translate('app.help.statistics', { days: LIMITS.statisticsDays })}
                     </Typography>
                 </CardContent>
