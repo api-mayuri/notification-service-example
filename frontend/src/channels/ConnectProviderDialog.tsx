@@ -32,7 +32,7 @@ import type { ProviderDescriptor } from './types';
 export const ProviderBadges = ({ provider, current }: { provider: ProviderDescriptor; current?: boolean }) => {
     const translate = useTranslate();
     return (
-        <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap">
+        <Stack sx={{ flexWrap: 'wrap' }} direction="row" spacing={0.5} useFlexGap>
             {current && <Chip size="small" color="primary" label={translate('app.provider.current')} />}
             <Chip
                 size="small"
@@ -60,13 +60,13 @@ const ProviderChoice = ({ channel, selected, onSelect }: { channel: string; sele
                     <Card variant="outlined" sx={{ borderColor: provider.id === selected ? 'primary.main' : undefined, height: '100%' }}>
                         <CardActionArea onClick={() => onSelect(provider)} sx={{ height: '100%' }}>
                             <CardContent>
-                                <Typography variant="subtitle1" fontWeight={600}>
+                                <Typography sx={{ fontWeight: 600 }} variant="subtitle1">
                                     {provider.name}{' '}
                                     <Typography component="span" variant="caption" color="text.secondary">
                                         ({provider.id})
                                     </Typography>
                                 </Typography>
-                                <Box my={1}>
+                                <Box sx={{ my: 1 }}>
                                     <ProviderBadges provider={provider} current={provider.id === current} />
                                 </Box>
                                 <Typography variant="body2" color="text.secondary">
@@ -160,7 +160,7 @@ const Result = ({ provider, values }: { provider: ProviderDescriptor; values: Re
             {tab === 1 && <CodeBlock code={yamlSnippet(provider)} />}
             {tab === 2 && planned && <CodeBlock code={javaSkeleton(provider)} maxHeight={480} />}
             {provider.docsUrl && (
-                <Typography variant="body2" mt={1}>
+                <Typography sx={{ mt: 1 }} variant="body2">
                     <Link href={provider.docsUrl} target="_blank" rel="noreferrer">
                         {translate('app.provider.provider_docs')}
                     </Link>

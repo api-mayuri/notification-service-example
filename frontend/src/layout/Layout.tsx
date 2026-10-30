@@ -67,7 +67,7 @@ const AppAppBar = () => (
         }
     >
         <TitlePortal />
-        <Box flex={1} />
+        <Box sx={{ flex: 1 }} />
     </AppBar>
 );
 

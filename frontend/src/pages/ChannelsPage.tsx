@@ -65,7 +65,7 @@ const Metrics = ({ channel }: { channel: string }) => {
         );
     }
     return (
-        <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" alignItems="center">
+        <Stack sx={{ flexWrap: 'wrap', alignItems: 'center' }} direction="row" spacing={0.5} useFlexGap>
             {Object.entries(data.outcomes).map(([outcome, count]) => (
                 <Chip
                     key={outcome}
@@ -102,7 +102,7 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
                 title={<Typography variant="h6">{channel}</Typography>}
                 subheader={translate(info.description, { _: channel })}
                 action={
-                    <Stack direction="row" spacing={0.5} mt={1}>
+                    <Stack sx={{ mt: 1 }} direction="row" spacing={0.5}>
                         {enabled === undefined ? (
                             <Chip size="small" label={translate('app.provider.state_unknown')} />
                         ) : enabled ? (
@@ -121,19 +121,19 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
                 }
             />
             <CardContent sx={{ flexGrow: 1, pt: 0 }}>
-                <Typography variant="overline" color="text.secondary" display="block">
+                <Typography sx={{ display: 'block' }} variant="overline" color="text.secondary">
                     {translate('app.provider.current_provider')}
                 </Typography>
                 {provider ? (
-                    <Box mb={1}>
-                        <Typography variant="subtitle1" fontWeight={600}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography sx={{ fontWeight: 600 }} variant="subtitle1">
                             {provider.name}{' '}
                             <Typography component="span" variant="caption" color="text.secondary">
                                 ({provider.id} · {provider.implementation})
                             </Typography>
                         </Typography>
                         <ProviderBadges provider={provider} />
-                        <Typography variant="body2" color="text.secondary" mt={1}>
+                        <Typography sx={{ mt: 1 }} variant="body2" color="text.secondary">
                             {translate(provider.description)}
                         </Typography>
                     </Box>
@@ -174,8 +174,8 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
                         </TableRow>
                     </TableBody>
                 </Table>
-                <Box mt={1}>
-                    <Typography variant="overline" color="text.secondary" display="block">
+                <Box sx={{ mt: 1 }}>
+                    <Typography sx={{ display: 'block' }} variant="overline" color="text.secondary">
                         {translate('app.provider.metrics')}
                     </Typography>
                     <Metrics channel={channel} />
@@ -223,7 +223,7 @@ export const ChannelsPage = () => {
     const translate = useTranslate();
     const { data: breakers, isPending } = useCircuitBreakers();
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={translate('app.menu.channels')} />
             <Alert severity="info" sx={{ mb: 2 }}>
                 {translate('app.provider.page_help')}

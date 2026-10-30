@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
-# Build: Node 22, npm cache reused between builds. Tests and typecheck run before the bundle.
-FROM node:22-alpine AS build
+# Build: Node 24 LTS, npm cache reused between builds. Tests and typecheck run before the bundle.
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund

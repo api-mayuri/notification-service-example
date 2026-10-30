@@ -106,7 +106,7 @@ export const TemplatePreviewPanel = ({ initialVersion }: { initialVersion?: numb
                     />
                 </Grid>
             </Grid>
-            <Stack direction="row" mt={2}>
+            <Stack sx={{ mt: 2 }} direction="row">
                 <Button variant="contained" startIcon={<VisibilityIcon />} onClick={run} disabled={loading}>
                     {translate('app.action.preview')}
                 </Button>
@@ -117,7 +117,7 @@ export const TemplatePreviewPanel = ({ initialVersion }: { initialVersion?: numb
                 </Alert>
             )}
             {preview && (
-                <Box mt={2}>
+                <Box sx={{ mt: 2 }}>
                     <Typography variant="caption" color="text.secondary">
                         v{preview.version} · {preview.locale}
                     </Typography>
@@ -128,7 +128,7 @@ export const TemplatePreviewPanel = ({ initialVersion }: { initialVersion?: numb
                     )}
                     {preview.htmlBody && <HtmlPreview html={preview.htmlBody} />}
                     {preview.textBody && (
-                        <Box mt={2}>
+                        <Box sx={{ mt: 2 }}>
                             <Typography variant="subtitle2">{translate('app.field.text_body')}</Typography>
                             <CodeBlock code={preview.textBody} />
                         </Box>

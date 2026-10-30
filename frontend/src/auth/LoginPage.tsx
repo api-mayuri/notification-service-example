@@ -54,7 +54,7 @@ export const LoginPage = () => {
         >
             <Card sx={{ width: 440, maxWidth: '100%' }}>
                 <CardContent>
-                    <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
                         <Avatar sx={{ bgcolor: 'primary.main', mb: 1 }}>
                             <NotificationsIcon />
                         </Avatar>
@@ -72,7 +72,7 @@ export const LoginPage = () => {
                                 submit({ mode: 'dev-token', clientId, scopes });
                             }}
                         >
-                            <Typography variant="body2" color="text.secondary" mb={2}>
+                            <Typography sx={{ mb: 2 }} variant="body2" color="text.secondary">
                                 {translate('app.auth.dev_token_help')}
                             </Typography>
                             <TextField
@@ -113,7 +113,7 @@ export const LoginPage = () => {
                                 submit({ mode: 'bearer', token });
                             }}
                         >
-                            <Typography variant="body2" color="text.secondary" mb={2}>
+                            <Typography sx={{ mb: 2 }} variant="body2" color="text.secondary">
                                 {translate('app.auth.bearer_help')}
                             </Typography>
                             <TextField

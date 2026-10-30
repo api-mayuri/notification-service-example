@@ -161,7 +161,7 @@ SMTP `4xx`, сетевые ошибки и ошибки аутентификац
 | Интеграция | `notification-presentation/.../integration/*IT` | REST/Kafka → БД → Kafka → канал → событие, повторы и DLT, идемпотентность, отказ брокера |
 | Архитектура | `notification-presentation/.../architecture` | ArchUnit: направление зависимостей, имена, внедрение через конструктор |
 
-Образ для деплоя собирает `Dockerfile` (JRE 25, непривилегированный пользователь, слои Spring Boot). Админку — `frontend/Dockerfile` (тесты и сборка на Node 22, раздача и прокси API на nginx); её тесты: `cd frontend && npm ci && npm test`.
+Образ для деплоя собирает `Dockerfile` (JRE 25, непривилегированный пользователь, слои Spring Boot). Админку — `frontend/Dockerfile` (тесты и сборка на Node 24, раздача и прокси API на nginx); её тесты: `cd frontend && npm ci && npm test`.
 
 ## Структура
 
@@ -175,4 +175,4 @@ docs/                         документация для разработч
 ai/                           рабочие заметки ИИ-агента (людям не нужны)
 ```
 
-**Стек:** Java 25, Spring Boot 4.1, Spring for Apache Kafka 4, Spring Modulith 2.1, PostgreSQL 17, Liquibase, Apache Kafka 4 (KRaft), Thymeleaf 3.1, Resilience4j, Micrometer + OpenTelemetry; админка — React 19, react-admin 5, MUI 7, Vite.
+**Стек:** Java 25, Spring Boot 4.1, Spring for Apache Kafka 4, Spring Modulith 2.1, PostgreSQL 17, Liquibase, Apache Kafka 4 (KRaft), Thymeleaf 3.1, Resilience4j, Micrometer + OpenTelemetry; админка — React 19, react-admin 5, MUI 9, Vite 8, TypeScript 7.

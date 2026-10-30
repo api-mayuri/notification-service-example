@@ -32,7 +32,7 @@ export const TemplateCreate = () => {
             })}
         >
             <SimpleForm defaultValues={{ channel: 'EMAIL', locale: 'ru', activate: true, requiredVariables: [] }}>
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} width="100%">
+                <Stack sx={{ width: '100%' }} direction={{ xs: 'column', md: 'row' }} spacing={2}>
                     <TextInput source="key" label="app.field.key" validate={[required(), keyPattern]} helperText="app.help.template_key" />
                     <SelectInput source="channel" label="app.field.channel" choices={CHANNELS.map(id => ({ id, name: id }))} validate={required()} />
                     <TextInput source="locale" label="app.field.locale" validate={required()} helperText="app.help.template_locale" />

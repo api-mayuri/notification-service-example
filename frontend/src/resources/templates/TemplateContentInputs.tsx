@@ -36,7 +36,7 @@ export const TemplateContentInputs = ({ channel }: { channel?: string }) => {
     const translate = useTranslate();
     const isEmail = !channel || channel === 'EMAIL';
     return (
-        <Box width="100%">
+        <Box sx={{ width: '100%' }}>
             <Alert severity="info" sx={{ mb: 2 }}>
                 {translate(isEmail ? 'app.help.template_syntax_email' : 'app.help.template_syntax_text')}
             </Alert>

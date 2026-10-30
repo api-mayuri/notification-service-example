@@ -1,6 +1,6 @@
 # Notification Service Admin
 
-Админка сервиса уведомлений на [react-admin](https://github.com/marmelab/react-admin) 5 (React 19, MUI 7, Vite, TypeScript).
+Админка сервиса уведомлений на [react-admin](https://github.com/marmelab/react-admin) 5 (React 19, MUI 9, Vite 8, TypeScript 7).
 Полное описание — [docs/frontend.md](../docs/frontend.md).
 
 ```bash

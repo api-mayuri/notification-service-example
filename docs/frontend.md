@@ -1,6 +1,6 @@
 # Админка (frontend)
 
-Веб-интерфейс сервиса на [react-admin](https://github.com/marmelab/react-admin) 5: React 19, MUI 7, Vite, TypeScript. Код — в [`frontend/`](../frontend). Интерфейс на русском и английском, светлая и тёмная тема. Как выглядят страницы — [screenshots/](screenshots/README.md).
+Веб-интерфейс сервиса на [react-admin](https://github.com/marmelab/react-admin) 5: React 19, MUI 9, Vite 8 (Rolldown), TypeScript 7, Vitest 5; Node 22.12+ (образ — Node 24 LTS). Код — в [`frontend/`](../frontend). Интерфейс на русском и английском, светлая и тёмная тема. Как выглядят страницы — [screenshots/](screenshots/README.md).
 
 ## Запуск
 
@@ -96,7 +96,7 @@ Vite проксирует `/api`, `/dev`, `/actuator`, `/v3/api-docs`, `/swagger
 
 ## Образ и деплой
 
-`frontend/Dockerfile`: сборка на Node 22 (`npm ci`, тесты, проверка типов, `vite build`), затем nginx 1.29:
+`frontend/Dockerfile`: сборка на Node 24 (`npm ci`, тесты, проверка типов, `vite build`), затем nginx 1.29:
 
 - раздаёт статику; неизвестные пути отдают `index.html` (маршруты SPA);
 - проксирует `/api`, `/dev`, `/actuator`, `/v3/api-docs`, `/swagger-ui*` на `BACKEND_URL` с заголовками `X-Forwarded-*` (бэкенд их учитывает: `server.forward-headers-strategy: framework`);

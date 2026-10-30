@@ -11,7 +11,7 @@ Human docs live in `README.md` and `docs/`. Agent working notes live in `ai/` (s
 
 ## Frontend (`frontend/`)
 
-- react-admin 5 + Vite + TypeScript. Checks: `cd frontend && npm ci && npm test && npm run build` (build includes `tsc`).
+- react-admin 5, MUI 9, Vite 8, TypeScript 7. MUI 9 has no system props (`mt`, `display`, `flexWrap`…) on Box/Typography/Stack: use `sx`. Checks: `cd frontend && npm ci && npm test && npm run build` (build includes `tsc`).
 - Human docs: `docs/frontend.md`. Backend DTOs are mirrored in `src/api/types.ts`; REST changes must update it and `src/api/dataProvider.ts`.
 - UI strings live in `src/i18n/{ru,en}.ts`; `i18n.test.ts` fails if a static `app.*` key used in code is missing.
 - Channel providers shown in the UI: `src/channels/providers/{builtIn,planned}.ts`. New backend provider → move it to `builtIn.ts`.

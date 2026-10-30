@@ -130,7 +130,7 @@ const PreferencesForm = ({ recipientId }: { recipientId: string }) => {
     return (
         <Card variant="outlined">
             <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                <Stack sx={{ alignItems: 'center', mb: 2 }} direction="row" spacing={1}>
                     <Typography variant="h6">{recipientId}</Typography>
                     {data.updatedAt ? (
                         <Chip size="small" label={`${translate('app.field.updatedAt')}: ${new Date(data.updatedAt).toLocaleString()}`} />
@@ -178,10 +178,10 @@ const PreferencesForm = ({ recipientId }: { recipientId: string }) => {
                             <TextInput source="locale" label="app.field.locale" helperText="app.help.recipient_locale" />
                         </Grid>
                     </Grid>
-                    <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+                    <Typography sx={{ display: 'block', mb: 2 }} variant="caption" color="text.secondary">
                         {translate('app.help.quiet_hours')}
                     </Typography>
-                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    <Stack sx={{ flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                         <SaveButton label="app.action.save_replace" disabled={saving} alwaysEnable />
                         <Button
                             variant="outlined"
@@ -218,14 +218,14 @@ export const PreferencesPage = () => {
     };
 
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={translate('app.menu.preferences')} />
             <Card variant="outlined" sx={{ mb: 2 }}>
                 <CardContent>
-                    <Typography variant="body2" color="text.secondary" mb={2}>
+                    <Typography sx={{ mb: 2 }} variant="body2" color="text.secondary">
                         {translate('app.help.preferences')}
                     </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={1}>
                         <TextField
                             size="small"
                             label={translate('app.field.recipientId')}
@@ -248,8 +248,8 @@ export const PreferencesPage = () => {
                         </Button>
                     </Stack>
                     {recent.length > 0 && (
-                        <Stack direction="row" spacing={0.5} mt={1} useFlexGap flexWrap="wrap" alignItems="center">
-                            <Typography variant="caption" color="text.secondary" mr={1}>
+                        <Stack sx={{ mt: 1, flexWrap: 'wrap', alignItems: 'center' }} direction="row" spacing={0.5} useFlexGap>
+                            <Typography sx={{ mr: 1 }} variant="caption" color="text.secondary">
                                 {translate('app.help.recent')}
                             </Typography>
                             {recent.map(id => (

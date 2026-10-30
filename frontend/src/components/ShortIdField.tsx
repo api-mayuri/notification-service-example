@@ -9,7 +9,7 @@ export const ShortIdField = ({ source = 'id', copy = false }: { source?: string;
     const value = record?.[source];
     if (!value) return null;
     return (
-        <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Stack sx={{ alignItems: 'center' }} direction="row" spacing={0.5}>
             <Tooltip title={String(value)}>
                 <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                     {shortId(String(value))}

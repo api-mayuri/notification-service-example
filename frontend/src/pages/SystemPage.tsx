@@ -91,12 +91,12 @@ const TokenCard = () => {
         <Card variant="outlined">
             <CardHeader title={translate('app.system.token')} action={<CopyButton text={auth.token} />} />
             <CardContent>
-                <Stack direction="row" spacing={1} mb={1} useFlexGap flexWrap="wrap">
+                <Stack sx={{ mb: 1, flexWrap: 'wrap' }} direction="row" spacing={1} useFlexGap>
                     <Chip label={`client: ${auth.clientId}`} color="primary" />
                     {auth.expiresAt && <Chip label={`${translate('app.system.expires')}: ${new Date(auth.expiresAt).toLocaleString()}`} />}
                 </Stack>
                 <Typography variant="subtitle2">{translate('app.system.scopes')}</Typography>
-                <Stack direction="row" spacing={0.5} mb={2} useFlexGap flexWrap="wrap">
+                <Stack sx={{ mb: 2, flexWrap: 'wrap' }} direction="row" spacing={0.5} useFlexGap>
                     {ALL_SCOPES.map(scope => (
                         <Chip
                             key={scope}
@@ -126,7 +126,7 @@ export const SystemPage = () => {
         { label: 'Prometheus', href: `${config.apiUrl}/actuator/prometheus` },
     ];
     return (
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
             <Title title={translate('app.menu.system')} />
             <Grid container spacing={2}>
                 <Grid size={{ xs: 12, lg: 7 }}>
@@ -176,7 +176,7 @@ export const SystemPage = () => {
                                     ))}
                                 </TableBody>
                             </Table>
-                            <Typography variant="subtitle2" mt={2}>
+                            <Typography sx={{ mt: 2 }} variant="subtitle2">
                                 {translate('app.system.event_types')}
                             </Typography>
                             <CodeBlock code={EVENT_TYPES.join('\n')} />
@@ -191,7 +191,7 @@ export const SystemPage = () => {
                     <Card variant="outlined" sx={{ mt: 2 }}>
                         <CardHeader title={translate('app.system.links')} />
                         <CardContent>
-                            <Stack spacing={1} alignItems="flex-start">
+                            <Stack sx={{ alignItems: 'flex-start' }} spacing={1}>
                                 {links.map(link => (
                                     <Button key={link.label} href={link.href} target="_blank" rel="noreferrer" endIcon={<OpenInNewIcon />}>
                                         {link.label}
