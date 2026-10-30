@@ -20,6 +20,8 @@ Email (SMTP) и webhook работают по-настоящему. SMS, Telegra
 
 | Документ | Для чего |
 |---|---|
+| [docs/frontend.md](docs/frontend.md) | **Админка** на react-admin: что покрыто, каналы и провайдеры, настройки, деплой |
+| [docs/screenshots/](docs/screenshots/README.md) | Скриншоты всех страниц админки |
 | [docs/integration.md](docs/integration.md) | **Подключить к своему бэкенду:** REST API, Kafka-команды и события, вебхуки, ошибки, авторизация |
 | [docs/configuration.md](docs/configuration.md) | Все настройки, переменные окружения, топики Kafka, БД, наблюдаемость |
 | [docs/architecture.md](docs/architecture.md) | Как устроен: модули, путь уведомления, статусы, гарантии доставки |
@@ -38,10 +40,11 @@ Email (SMTP) и webhook работают по-настоящему. SMS, Telegra
 docker compose up --build
 ```
 
-Поднимутся PostgreSQL, Kafka (KRaft), Kafka UI, Mailpit и сам сервис с профилем `local`.
+Поднимутся PostgreSQL, Kafka (KRaft), Kafka UI, Mailpit, сам сервис с профилем `local` и админка. Настройки — `.env` рядом с `docker-compose.yml` (пример — [.env.example](.env.example)).
 
 | Что | Адрес |
 |---|---|
+| **Админка** (вход: вкладка «Dev-токен»; [скриншоты](docs/screenshots/README.md)) | http://localhost:3000 |
 | API и Swagger UI | http://localhost:8080/swagger-ui.html |
 | Mailpit (входящие письма) | http://localhost:8025 |
 | Kafka UI | http://localhost:8088 |
@@ -158,7 +161,7 @@ SMTP `4xx`, сетевые ошибки и ошибки аутентификац
 | Интеграция | `notification-presentation/.../integration/*IT` | REST/Kafka → БД → Kafka → канал → событие, повторы и DLT, идемпотентность, отказ брокера |
 | Архитектура | `notification-presentation/.../architecture` | ArchUnit: направление зависимостей, имена, внедрение через конструктор |
 
-Образ для деплоя собирает `Dockerfile` (JRE 25, непривилегированный пользователь, слои Spring Boot).
+Образ для деплоя собирает `Dockerfile` (JRE 25, непривилегированный пользователь, слои Spring Boot). Админку — `frontend/Dockerfile` (тесты и сборка на Node 22, раздача и прокси API на nginx); её тесты: `cd frontend && npm ci && npm test`.
 
 ## Структура
 
@@ -167,8 +170,9 @@ notification-domain/          домен: агрегаты, политики, с
 notification-application/     сценарии и порты (интерфейсы для адаптеров)
 notification-infrastructure/  адаптеры: REST, Kafka, JPA, каналы, шаблоны
 notification-presentation/    Spring Boot приложение, конфигурация, Liquibase
+frontend/                     админка на react-admin (Vite, TypeScript), образ nginx
 docs/                         документация для разработчиков
 ai/                           рабочие заметки ИИ-агента (людям не нужны)
 ```
 
-**Стек:** Java 25, Spring Boot 4.1, Spring for Apache Kafka 4, Spring Modulith 2.1, PostgreSQL 17, Liquibase, Apache Kafka 4 (KRaft), Thymeleaf 3.1, Resilience4j, Micrometer + OpenTelemetry.
+**Стек:** Java 25, Spring Boot 4.1, Spring for Apache Kafka 4, Spring Modulith 2.1, PostgreSQL 17, Liquibase, Apache Kafka 4 (KRaft), Thymeleaf 3.1, Resilience4j, Micrometer + OpenTelemetry; админка — React 19, react-admin 5, MUI 7, Vite.
