@@ -1,0 +1,63 @@
+# Rendered by the nginx image (envsubst) from BACKEND_URL and NGINX_RESOLVER.
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # Resolve the backend per request: nginx starts even if the service is not up yet
+    # and follows its new address after a restart.
+    resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
+    set $backend ${BACKEND_URL};
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy same-origin always;
+    add_header X-Frame-Options SAMEORIGIN always;
+
+    client_max_body_size 10m;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Backend: REST API, dev tokens (profile local), actuator, OpenAPI and Swagger UI.
+    # $http_host keeps the external port, so redirects and Swagger URLs point back here.
+    location ~ ^/(api|dev|actuator|v3/api-docs|swagger-ui)(/|$) {
+        proxy_pass $backend;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_read_timeout 60s;
+    }
+
+    location = /swagger-ui.html {
+        proxy_pass $backend;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+    }
+
+    # Runtime settings: never cached.
+    location = /config.js {
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options nosniff always;
+    }
+
+    # Hashed bundles.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options nosniff always;
+        try_files $uri =404;
+    }
+
+    # SPA: unknown paths go to index.html (react-router).
+    location / {
+        add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy same-origin always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        try_files $uri $uri/ /index.html;
+    }
+}
