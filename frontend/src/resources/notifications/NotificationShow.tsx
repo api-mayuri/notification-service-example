@@ -47,7 +47,7 @@ const DeliveryProgress = () => {
     const record = useRecordContext<NotificationView>();
     const translate = useTranslate();
     if (!record) return null;
-    const counts = record.deliveries.reduce<Record<string, number>>((acc, delivery) => {
+    const counts = (record.deliveries ?? []).reduce<Record<string, number>>((acc, delivery) => {
         acc[delivery.status] = (acc[delivery.status] ?? 0) + 1;
         return acc;
     }, {});

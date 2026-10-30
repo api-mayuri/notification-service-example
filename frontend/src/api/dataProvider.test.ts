@@ -73,11 +73,14 @@ describe('dataProvider', () => {
     it('sends notifications with the Idempotency-Key header and reports replays', async () => {
         const calls = mockFetch([
             { status: 202, body: { id: 'n1', status: 'ACCEPTED', outcome: 'REPLAYED' }, headers: { 'Idempotent-Replayed': 'true' } },
+            { body: { id: 'n1', status: 'IN_PROGRESS', deliveries: [] } },
         ]);
         const result = await dataProvider.create('notifications', {
             data: { idempotencyKey: 'order-1', recipient: { id: 'u' }, channels: ['EMAIL'], category: 'TRANSACTIONAL' },
         });
-        expect(result.data).toEqual({ id: 'n1', status: 'ACCEPTED', outcome: 'REPLAYED', replayed: true });
+        // Full view for the react-admin cache plus the outcome of the POST.
+        expect(result.data).toEqual({ id: 'n1', status: 'IN_PROGRESS', deliveries: [], outcome: 'REPLAYED', replayed: true });
+        expect(calls[1].url).toBe('/api/v1/notifications/n1');
         const headers = calls[0].init.headers as Record<string, string>;
         expect(headers['Idempotency-Key']).toBe('order-1');
         expect(JSON.parse(String(calls[0].init.body))).not.toHaveProperty('idempotencyKey');

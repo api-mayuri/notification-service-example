@@ -280,7 +280,7 @@ export const ru = {
         provider: {
             page_help:
                 'Провайдер канала выбирается на бэкенде переменной окружения (<КАНАЛ>_PROVIDER → notification.channels.<канал>.provider). Сейчас SMS, Telegram, WhatsApp и push работают через логирующие заглушки: они пишут в лог, что было бы отправлено, и возвращают simulated=true.',
-            no_health_details: 'Детали health скрыты (профиль prod): состояние каналов и circuit breaker неизвестно.',
+            no_health_details: 'Метрики circuit breaker и детали health недоступны (например, actuator на отдельном порту в prod): включён ли канал, неизвестно.',
             current_provider: 'Текущий провайдер',
             current: 'текущий',
             enabled: 'включён',

@@ -1,4 +1,5 @@
-import { Admin, CustomRoutes, Resource, defaultDarkTheme, defaultLightTheme } from 'react-admin';
+import type { ReactNode } from 'react';
+import { Admin, Authenticated, CustomRoutes, Resource, defaultDarkTheme, defaultLightTheme } from 'react-admin';
 import { Route } from 'react-router-dom';
 import { dataProvider } from './api/dataProvider';
 import { authProvider } from './auth/authProvider';
@@ -14,6 +15,10 @@ import { StatisticsPage } from './pages/StatisticsPage';
 import { ChannelsPage } from './pages/ChannelsPage';
 import { SystemPage } from './pages/SystemPage';
 
+// Custom pages check the session like resource views do. Admin's requireAuth is not used:
+// with a custom login page it re-renders the login page in a loop (react-admin 5.15).
+const Private = ({ children }: { children: ReactNode }) => <Authenticated>{children}</Authenticated>;
+
 export const App = () => (
     <Admin
         title={config.title}
@@ -25,18 +30,17 @@ export const App = () => (
         dashboard={Dashboard}
         theme={defaultLightTheme}
         darkTheme={defaultDarkTheme}
-        requireAuth
         disableTelemetry
     >
         <Resource name="notifications" {...notifications} options={{ label: 'app.menu.notifications' }} />
         <Resource name="templates" {...templates} options={{ label: 'app.menu.templates' }} />
         <Resource name="preferences" options={{ label: 'app.menu.preferences' }} />
         <CustomRoutes>
-            <Route path="/notifications/batch" element={<BatchSend />} />
-            <Route path="/preferences" element={<PreferencesPage />} />
-            <Route path="/statistics" element={<StatisticsPage />} />
-            <Route path="/channels" element={<ChannelsPage />} />
-            <Route path="/system" element={<SystemPage />} />
+            <Route path="/notifications/batch" element={<Private><BatchSend /></Private>} />
+            <Route path="/preferences" element={<Private><PreferencesPage /></Private>} />
+            <Route path="/statistics" element={<Private><StatisticsPage /></Private>} />
+            <Route path="/channels" element={<Private><ChannelsPage /></Private>} />
+            <Route path="/system" element={<Private><SystemPage /></Private>} />
         </CustomRoutes>
     </Admin>
 );

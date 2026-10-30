@@ -38,6 +38,52 @@ export function circuitBreakers(health: HealthComponent | undefined): Record<str
     return result;
 }
 
+const CB_STATE_METRIC = 'resilience4j.circuitbreaker.state';
+const CB_FAILURE_RATE_METRIC = 'resilience4j.circuitbreaker.failure.rate';
+// Most likely first: usually one request per breaker.
+const CB_STATES = ['closed', 'open', 'half_open', 'forced_open', 'disabled', 'metrics_only'];
+
+/**
+ * Circuit breakers from Micrometer (resilience4j.circuitbreaker.state{name, state} = 1 for the
+ * current state); a breaker channel-<channel> exists only for enabled channels. Falls back to
+ * the health component when metrics are not reachable.
+ */
+export const useCircuitBreakers = () => {
+    const api = useNotificationApi();
+    const health = useHealth();
+    const metrics = useQuery({
+        queryKey: ['actuator', 'metrics', CB_STATE_METRIC],
+        refetchInterval: 15000,
+        queryFn: async (): Promise<Record<string, CircuitBreakerState> | null> => {
+            const overall = await api.getMetric(CB_STATE_METRIC);
+            if (!overall) return null;
+            const names = overall.availableTags.find(t => t.tag === 'name')?.values ?? [];
+            const result: Record<string, CircuitBreakerState> = {};
+            await Promise.all(
+                names.map(async name => {
+                    let state: string | undefined;
+                    for (const candidate of CB_STATES) {
+                        const metric = await api.getMetric(CB_STATE_METRIC, { name, state: candidate });
+                        if (metric?.measurements.some(m => m.value >= 1)) {
+                            state = candidate.toUpperCase();
+                            break;
+                        }
+                    }
+                    const rate = (await api.getMetric(CB_FAILURE_RATE_METRIC, { name }))?.measurements[0]?.value;
+                    result[name] = {
+                        status: state === 'OPEN' || state === 'FORCED_OPEN' ? 'CIRCUIT_OPEN' : 'UP',
+                        state,
+                        // -1: not enough calls in the sliding window yet.
+                        failureRate: rate === undefined || rate < 0 ? undefined : `${rate}%`,
+                    };
+                }),
+            );
+            return result;
+        },
+    });
+    return { data: metrics.data ?? circuitBreakers(health.data), isPending: metrics.isPending && health.isPending };
+};
+
 export const useHealth = () => {
     const api = useNotificationApi();
     return useQuery({ queryKey: ['actuator', 'health'], queryFn: () => api.getHealth(), refetchInterval: 15000 });

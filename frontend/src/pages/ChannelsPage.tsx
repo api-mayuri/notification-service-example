@@ -35,7 +35,7 @@ import { ConnectProviderDialog, ProviderBadges } from '../channels/ConnectProvid
 import { LoggerConsole } from '../channels/LoggerConsole';
 import { WebhookSignatureTool } from '../channels/WebhookSignatureTool';
 import { channelInfo, currentProviderId, findProvider, providerEnv, providersFor } from '../channels/registry';
-import { circuitBreakers, useChannelMetrics, useHealth, type CircuitBreakerState } from '../channels/useChannelStatus';
+import { useChannelMetrics, useCircuitBreakers, type CircuitBreakerState } from '../channels/useChannelStatus';
 
 const OUTCOME_COLORS: Record<string, 'success' | 'warning' | 'error' | 'default' | 'info'> = {
     success: 'success',
@@ -121,7 +121,7 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
                 }
             />
             <CardContent sx={{ flexGrow: 1, pt: 0 }}>
-                <Typography variant="overline" color="text.secondary">
+                <Typography variant="overline" color="text.secondary" display="block">
                     {translate('app.provider.current_provider')}
                 </Typography>
                 {provider ? (
@@ -175,7 +175,7 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
                     </TableBody>
                 </Table>
                 <Box mt={1}>
-                    <Typography variant="overline" color="text.secondary">
+                    <Typography variant="overline" color="text.secondary" display="block">
                         {translate('app.provider.metrics')}
                     </Typography>
                     <Metrics channel={channel} />
@@ -221,15 +221,14 @@ const ChannelCard = ({ channel, breaker, breakersKnown }: { channel: string; bre
 
 export const ChannelsPage = () => {
     const translate = useTranslate();
-    const { data: health } = useHealth();
-    const breakers = circuitBreakers(health);
+    const { data: breakers, isPending } = useCircuitBreakers();
     return (
         <Box p={2}>
             <Title title={translate('app.menu.channels')} />
             <Alert severity="info" sx={{ mb: 2 }}>
                 {translate('app.provider.page_help')}
             </Alert>
-            {!breakers && health && (
+            {!breakers && !isPending && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
                     {translate('app.provider.no_health_details')}
                 </Alert>

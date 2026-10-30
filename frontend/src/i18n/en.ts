@@ -284,7 +284,7 @@ export const en: Messages<typeof ru> = {
         provider: {
             page_help:
                 'The channel provider is selected on the backend by an environment variable (<CHANNEL>_PROVIDER → notification.channels.<channel>.provider). SMS, Telegram, WhatsApp and push currently use logging stubs: they log what would be sent and return simulated=true.',
-            no_health_details: 'Health details are hidden (profile prod): channel and circuit breaker state is unknown.',
+            no_health_details: 'Circuit breaker metrics and health details are unavailable (e.g. actuator on a separate port in prod): channel state is unknown.',
             current_provider: 'Current provider',
             current: 'current',
             enabled: 'enabled',

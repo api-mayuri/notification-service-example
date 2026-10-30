@@ -39,9 +39,13 @@ export const authProvider: AuthProvider = {
 
     async checkAuth() {
         const auth = tokenStorage.get();
-        if (!auth || isExpired(auth)) {
+        if (!auth) {
+            // Not signed in yet: go to the login page without a notification.
+            throw { message: false };
+        }
+        if (isExpired(auth)) {
             tokenStorage.clear();
-            throw new Error('app.auth.expired');
+            throw { message: 'app.auth.expired' };
         }
     },
 

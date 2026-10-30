@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Title, useGetList, usePermissions, useTranslate } from 'react-admin';
 import { Box, Button, Card, CardContent, CardHeader, Grid, List, ListItemButton, ListItemText, Stack, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
@@ -57,8 +57,13 @@ export const Dashboard = () => {
     const canRead = hasScope(permissions, SCOPES.read);
     const canSend = hasScope(permissions, SCOPES.send);
     const { load } = stats;
+    const loaded = useRef(false);
+    // load is recreated on every render (the data provider proxy is not stable): run it once.
     useEffect(() => {
-        if (canRead) load();
+        if (canRead && !loaded.current) {
+            loaded.current = true;
+            load();
+        }
     }, [canRead, load]);
     return (
         <Box p={2}>

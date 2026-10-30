@@ -112,7 +112,8 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
     return (
         <Box>
             {versions.map(version => (
-                <Accordion key={version.version} variant="outlined" defaultExpanded={version.status === 'ACTIVE'} disableGutters>
+                // status in the key: remount (and re-apply defaultExpanded) when a version gets activated
+                <Accordion key={`${version.version}-${version.status}`} variant="outlined" defaultExpanded={version.status === 'ACTIVE'} disableGutters>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Stack direction="row" spacing={1} alignItems="center" width="100%" flexWrap="wrap" useFlexGap>
                             <Typography fontWeight={600}>v{version.version}</Typography>
@@ -174,10 +175,12 @@ const Variants = () => {
     const api = useNotificationApi();
     const translate = useTranslate();
     const [variants, setVariants] = useState<TemplateView[] | null>(null);
+    const key = record?.key;
     useEffect(() => {
-        if (!record) return;
-        api.getTemplatesByKey(record.key).then(setVariants, () => setVariants([]));
-    }, [api, record]);
+        if (!key) return;
+        api.getTemplatesByKey(key).then(setVariants, () => setVariants([]));
+        // api is a new proxy on every render; refetch only when the key changes
+    }, [key]);
     if (!record || !variants) return null;
     return (
         <Table size="small">

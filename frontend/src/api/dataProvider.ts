@@ -170,7 +170,9 @@ export const dataProvider: NotificationDataProvider = {
             const { idempotencyKey, ...request } = params.data as NotificationRequest & { idempotencyKey?: string };
             const key = (params.meta?.idempotencyKey as string | undefined) ?? idempotencyKey ?? newIdempotencyKey();
             const accepted = await dataProvider.sendNotification(request, key);
-            return { data: accepted };
+            // react-admin caches the create result as the record: store the full view, not the 202 body.
+            const view = await api.get<NotificationView>(`${NOTIFICATIONS}/${enc(accepted.id)}`);
+            return { data: { ...view, outcome: accepted.outcome, replayed: accepted.replayed } };
         }
         if (resource === 'templates') {
             const response = await api.post<TemplateView>(TEMPLATES, params.data as CreateTemplateRequest);
