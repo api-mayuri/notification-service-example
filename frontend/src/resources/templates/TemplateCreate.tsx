@@ -1,14 +1,25 @@
 import { BooleanInput, Create, SelectInput, SimpleForm, TextInput, required, useTranslate } from 'react-admin';
 import { useWatch } from 'react-hook-form';
-import { Stack } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 import { CHANNELS } from '../../api/constants';
 import type { CreateTemplateRequest } from '../../api/types';
 import { normalizeDuration, validateDuration } from '../../utils/duration';
+import { LiveTemplatePreview } from '../../templates/LiveTemplatePreview';
 import { TemplateContentInputs } from './TemplateContentInputs';
 
+/** Editor on the left, live preview on the right (stacked on narrow screens). */
 const ContentForChannel = () => {
     const channel = useWatch({ name: 'channel' });
-    return <TemplateContentInputs channel={channel} />;
+    return (
+        <Grid container spacing={3} sx={{ width: '100%' }}>
+            <Grid size={{ xs: 12, lg: 6 }}>
+                <TemplateContentInputs channel={channel} />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }}>
+                <LiveTemplatePreview channel={channel} />
+            </Grid>
+        </Grid>
+    );
 };
 
 // Same rule as TemplateKey on the backend: kebab-case, up to 100 characters.

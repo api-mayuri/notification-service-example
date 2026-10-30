@@ -28,6 +28,7 @@ export const ru = {
             preview: 'Предпросмотр',
             variants: 'Каналы и локали ключа',
             raw_html: 'HTML (без подстановки переменных)',
+            rendered: 'Как выглядит (%{format}, без переменных)',
             deliveries_by_period: 'Доставки по периодам',
             totals_by_channel: 'Итого по каналам',
         },
@@ -46,6 +47,7 @@ export const ru = {
             new_version_from: 'Новая версия на основе этой',
             template_settings: 'Дедупликация',
             detect_variables: 'Найти переменные в тексте',
+            insert_style: 'Вставить <style> (CSS)',
             save_replace: 'Сохранить (PUT)',
             clear_quiet_hours: 'Убрать тихие часы (PATCH)',
             clear_locale: 'Сбросить язык (PATCH)',
@@ -340,6 +342,16 @@ export const ru = {
                 signing_secret: 'Секрет подписи',
                 require_https: 'Только HTTPS URL',
             },
+        },
+        preview: {
+            title: 'Живое превью',
+            auto: 'Авто: %{format}',
+            text: 'Текст',
+            desktop: 'Десктоп',
+            mobile: 'Мобильный (375 px)',
+            markdown_note:
+                'Markdown показан только в превью: сервис отправляет шаблон как есть (Thymeleaf HTML для EMAIL, TEXT для остальных каналов). Пригодится для провайдеров, которые понимают Markdown (например, Telegram parse_mode).',
+            hint: 'Рендер в браузере с тестовыми значениями; точный серверный рендер — вкладка «Предпросмотр» сохранённой версии.',
         },
         webhook: {
             tool: 'Проверка подписи',

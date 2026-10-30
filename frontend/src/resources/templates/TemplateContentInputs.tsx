@@ -2,6 +2,8 @@ import { TextArrayInput, TextInput, useTranslate } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
 import { Alert, Box, Button } from '@mui/material';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import StyleIcon from '@mui/icons-material/Style';
+import { STYLE_SNIPPET } from '../../templates/render';
 
 /** Variable names used in a Thymeleaf template: ${name}, ${name.field}, [(${name})]. */
 export function detectVariables(...sources: (string | null | undefined)[]): string[] {
@@ -27,6 +29,21 @@ const DetectVariablesButton = () => {
             }}
         >
             {translate('app.action.detect_variables')}
+        </Button>
+    );
+};
+
+/** Prepends a <style> skeleton to the HTML body (HTML + CSS templates). */
+const InsertStyleButton = () => {
+    const { getValues, setValue } = useFormContext();
+    const translate = useTranslate();
+    return (
+        <Button
+            size="small"
+            startIcon={<StyleIcon />}
+            onClick={() => setValue('body', STYLE_SNIPPET + (getValues('body') ?? ''), { shouldDirty: true })}
+        >
+            {translate('app.action.insert_style')}
         </Button>
     );
 };
@@ -63,6 +80,7 @@ export const TemplateContentInputs = ({ channel }: { channel?: string }) => {
             )}
             <TextArrayInput source="requiredVariables" label="app.field.requiredVariables" helperText="app.help.required_variables" fullWidth />
             <DetectVariablesButton />
+            {isEmail && <InsertStyleButton />}
         </Box>
     );
 };

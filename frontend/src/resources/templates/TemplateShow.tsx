@@ -46,6 +46,7 @@ import { CodeBlock } from '../../components/CodeBlock';
 import { HtmlPreview } from '../../components/HtmlPreview';
 import { StatusChip } from '../../components/StatusChip';
 import { humanizeDuration } from '../../utils/duration';
+import { detectFormat, renderPreviewDocument } from '../../templates/render';
 import { AddVersionDialog, SettingsDialog, useDialog } from './TemplateDialogs';
 import { TemplatePreviewPanel } from './TemplatePreviewPanel';
 
@@ -145,7 +146,7 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                             )}
                         </Stack>
                         <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, md: record.channel === 'EMAIL' ? 6 : 12 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <Typography variant="subtitle2">{translate(record.channel === 'EMAIL' ? 'app.field.html_body' : 'app.field.body')}</Typography>
                                 <CodeBlock code={version.body} maxHeight={320} />
                                 {version.textBody && (
@@ -155,12 +156,12 @@ const Versions = ({ onPreview, onCopy }: { onPreview: (v: number) => void; onCop
                                     </Box>
                                 )}
                             </Grid>
-                            {record.channel === 'EMAIL' && (
-                                <Grid size={{ xs: 12, md: 6 }}>
-                                    <Typography variant="subtitle2">{translate('app.section.raw_html')}</Typography>
-                                    <HtmlPreview html={version.body} />
-                                </Grid>
-                            )}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Typography variant="subtitle2">
+                                    {translate('app.section.rendered', { format: detectFormat(version.body).toUpperCase() })}
+                                </Typography>
+                                <HtmlPreview html={renderPreviewDocument(version.body, detectFormat(version.body))} />
+                            </Grid>
                         </Grid>
                     </AccordionDetails>
                 </Accordion>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { BooleanInput, Form, SaveButton, TextInput, useNotify, useRecordContext, useRefresh, useTranslate, useUpdate } from 'react-admin';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import TimerIcon from '@mui/icons-material/Timer';
 import { useNotificationApi } from '../../api/useNotificationApi';
 import type { AddVersionRequest, TemplateVersion, TemplateView } from '../../api/types';
 import { durationToSeconds, normalizeDuration, secondsToIso, validateDuration } from '../../utils/duration';
+import { LiveTemplatePreview } from '../../templates/LiveTemplatePreview';
 import { TemplateContentInputs } from './TemplateContentInputs';
 
 /** POST /templates/{key}/versions: new DRAFT version, optionally activated at once. */
@@ -44,7 +45,7 @@ export const AddVersionDialog = ({
         }
     };
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
             <Form
                 onSubmit={submit}
                 defaultValues={{
@@ -59,8 +60,15 @@ export const AddVersionDialog = ({
                     {translate('app.action.add_version')} · {record.key} · {record.channel}/{record.locale}
                 </DialogTitle>
                 <DialogContent>
-                    <TemplateContentInputs channel={record.channel} />
-                    <BooleanInput source="activate" label="app.field.activate" helperText="app.help.activate" />
+                    <Grid container spacing={3}>
+                        <Grid size={{ xs: 12, lg: 6 }}>
+                            <TemplateContentInputs channel={record.channel} />
+                            <BooleanInput source="activate" label="app.field.activate" helperText="app.help.activate" />
+                        </Grid>
+                        <Grid size={{ xs: 12, lg: 6 }}>
+                            <LiveTemplatePreview channel={record.channel} />
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose}>{translate('ra.action.cancel')}</Button>
