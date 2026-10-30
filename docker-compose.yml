@@ -1,6 +1,7 @@
-# Local environment: PostgreSQL, Kafka (KRaft, no ZooKeeper), Kafka UI, Mailpit, and the service.
-#   docker compose up --build
-# API: http://localhost:8080/swagger-ui.html  Mailpit: http://localhost:8025  Kafka UI: http://localhost:8088
+# Local environment: PostgreSQL, Kafka (KRaft, no ZooKeeper), Kafka UI, Mailpit, the service and the admin UI.
+#   docker compose up --build            (settings: .env next to this file, see .env.example)
+# Admin UI: http://localhost:3000  API: http://localhost:8080/swagger-ui.html
+# Mailpit: http://localhost:8025  Kafka UI: http://localhost:8088
 name: notification-service
 
 services:
@@ -71,10 +72,23 @@ services:
       DB_USERNAME: notifications
       DB_PASSWORD: notifications
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SMTP_HOST: mailpit
-      SMTP_PORT: 1025
-      MAIL_FROM: no-reply@notifications.local
-      WEBHOOK_SIGNING_SECRET: local-webhook-secret
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_SSL: ${SMTP_SSL:-false}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@notifications.local}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Notifications}
+      WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET:-local-webhook-secret}
+      # Provider per channel; the same variables tell the admin UI what is configured.
+      NOTIFICATION_CHANNELS_EMAIL_PROVIDER: ${EMAIL_PROVIDER:-smtp}
+      NOTIFICATION_CHANNELS_SMS_PROVIDER: ${SMS_PROVIDER:-logging}
+      NOTIFICATION_CHANNELS_TELEGRAM_PROVIDER: ${TELEGRAM_PROVIDER:-logging}
+      NOTIFICATION_CHANNELS_WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-logging}
+      NOTIFICATION_CHANNELS_PUSH_PROVIDER: ${PUSH_PROVIDER:-logging}
+      NOTIFICATION_CHANNELS_WEBHOOK_PROVIDER: ${WEBHOOK_PROVIDER:-http}
     ports:
       - "8080:8080"
     depends_on:
@@ -91,6 +105,27 @@ services:
       timeout: 5s
       retries: 30
       start_period: 40s
+
+  # Admin UI (react-admin): nginx serves the bundle and proxies /api, /dev, /actuator to the service.
+  frontend:
+    build: ./frontend
+    environment:
+      BACKEND_URL: http://notification-service:8080
+      APP_TITLE: ${FRONTEND_TITLE:-Notification Service}
+      AUTH_MODE: ${FRONTEND_AUTH_MODE:-dev-token}
+      DEV_TOKEN_CLIENT_ID: ${FRONTEND_DEV_CLIENT_ID:-admin-ui}
+      DEFAULT_LOCALE: ${FRONTEND_LOCALE:-ru}
+      POLL_INTERVAL_MS: ${FRONTEND_POLL_INTERVAL_MS:-5000}
+      SWAGGER_URL: ${FRONTEND_SWAGGER_URL:-/swagger-ui.html}
+      MAILPIT_URL: ${FRONTEND_MAILPIT_URL:-http://localhost:8025}
+      KAFKA_UI_URL: ${FRONTEND_KAFKA_UI_URL:-http://localhost:8088}
+      EXTRA_CHANNELS: ${FRONTEND_EXTRA_CHANNELS:-}
+      CHANNEL_PROVIDERS: EMAIL=${EMAIL_PROVIDER:-smtp},SMS=${SMS_PROVIDER:-logging},TELEGRAM=${TELEGRAM_PROVIDER:-logging},WHATSAPP=${WHATSAPP_PROVIDER:-logging},PUSH=${PUSH_PROVIDER:-logging},WEBHOOK=${WEBHOOK_PROVIDER:-http}
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      notification-service:
+        condition: service_started
 
 volumes:
   postgres-data:

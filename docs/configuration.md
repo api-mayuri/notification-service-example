@@ -35,6 +35,10 @@
 
 Примеры SMTP для Exchange, Postfix, Microsoft 365 и Google Workspace — в [README](../README.md#email).
 
+### docker compose
+
+`docker-compose.yml` читает `.env` рядом с собой (пример — [`.env.example`](../.env.example)): SMTP, `WEBHOOK_SIGNING_SECRET`, настройки админки (`FRONTEND_*`) и провайдеры каналов `<КАНАЛ>_PROVIDER` (`EMAIL_PROVIDER`, `SMS_PROVIDER`, `TELEGRAM_PROVIDER`, `WHATSAPP_PROVIDER`, `PUSH_PROVIDER`, `WEBHOOK_PROVIDER`). Провайдер передаётся сервису как `NOTIFICATION_CHANNELS_<КАНАЛ>_PROVIDER` и админке в `CHANNEL_PROVIDERS`. Настройки админки — в [frontend.md](frontend.md#настройки).
+
 ## `notification.*`
 
 ### Общие и повторы (`NotificationProperties`)
